@@ -108,13 +108,28 @@
       opacity: .6;
     }
     .credits a { color: inherit; }
+
+    .swatch {
+  width:22px;height:22px;border-radius:50%;
+  cursor:pointer;border:2px solid transparent;
+  transition:border .15s;
+}
+.swatch[data-active="true"] { border-color:var(--c-accent); }
+body.blocked .card { opacity:.4; pointer-events:none; }
+
+.card.column { flex-direction: column; }
+.card label   { font-size:12px; display:flex; justify-content:space-between; }
+.card input[type=range] { width:120px; }
+select { padding:4px 6px; border:1px solid var(--c-border); border-radius:6px; }
+button.mini { align-self:flex-start; font-size:11px; padding:4px 8px; }
+
+
   </style>
 </head>
 <body>
   <div class="card">
     <div class="txt">
       <h1>
-        <!-- simple book icon -->
         Dyslexia NLP Helper
       </h1>
       <div style="font-size:12px;opacity:.75">
@@ -128,9 +143,49 @@
       <span class="slider"></span>
     </label>
   </div>
+  <!-- Pastel overlay picker -->
+<div class="card">
+  <div class="txt">
+    <h1 style="gap:4px">
+      Overlay
+    </h1>
+    <div style="font-size:12px;opacity:.75">Soften background glare</div>
+  </div>
+
+  <div id="swatch-wrap">
+    <!-- swatches will be injected by popup.js -->
+  </div>
+</div>
+
+<!-- Typography -->
+<div class="card column" style="gap:14px">
+  <div class="row">
+    <h1>Typography</h1>
+    <label for="fontSelect" style="display:block;font-size:12px;opacity:.75;margin-bottom:2px;">Font family</label>
+    <select id="fontSelect">
+      <option value="inherit">Default</option>
+      <option value="'OpenDyslexic',sans-serif">OpenDyslexic</option>
+      <option value="'LexendDeca',sans-serif">Lexend Deca</option>
+    </select>
+  </div>
+
+  <label>Letter-spacing
+    <input type="range" id="ls"  min="0"  max="3" step=".1">
+  </label>
+
+  <label>Word-spacing
+    <input type="range" id="ws"  min="0"  max="6" step=".2">
+  </label>
+
+  <label>Line-height
+    <input type="range" id="lh"  min="1.0" max="2.0" step=".05">
+  </label>
+
+  <button id="resetTypo" class="mini">Reset</button>
+</div>
 
   <div class="credits">
-    v0.1 · Made with ✨Procrastination✨ <br> by Sam van Remortel
+    v0.2 · Made with ✨Procrastination✨ <br> by Sam van Remortel
   </div>
 
   <script src="popup.js"></script>

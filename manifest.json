@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Dyslexia NLP Helper (MVP)",
-  "version": "0.1",
+  "version": "0.2",
   "description": "Highlights difficult words and shows context-aware explanations.",
   "permissions": [
     "activeTab",
@@ -22,6 +22,15 @@
       ],
       "css": ["styles.css"],
       "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "assets/fonts/OpenDyslexic-Regular.woff2",
+        "assets/fonts/LexendDeca-VariableFont.woff2"
+      ],
+      "matches": ["<all_urls>"]
     }
   ]
 }
