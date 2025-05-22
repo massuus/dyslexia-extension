@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "Dyslexia NLP Helper (MVP)",
+  "version": "0.1",
+  "description": "Highlights difficult words and shows context-aware explanations.",
+  "permissions": ["activeTab"],
+  "host_permissions": ["https://api.openai.com/*"],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": [
+        "secret.js",          
+        "common-words.js",
+        "content.js"
+      ],
+      "css": ["styles.css"],
+      "run_at": "document_idle"
+    }
+  ]
+}
