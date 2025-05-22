@@ -1,4 +1,4 @@
-// ----------------- Dyslexia-NLP: Click-to-Explain -----------------
+/* ----------------- Dyslexia‑NLP: Click‑to‑Explain ----------------- */
 
 // CONFIG
 const MODEL = "gpt-4.1-nano";
@@ -13,7 +13,7 @@ function isDifficult(word) {
 
 /** API: fetch definition from OpenAI */
 async function fetchDefinition(word, sentence) {
-  const prompt = `Given the sentence: "${sentence}", explain the meaning of the word "${word}" in the same language as the sentence. Keep the explanation contextual and under 15 words.`;
+  const prompt = `In context of "${sentence}", explain "${word}" in ≤15 words, same language as context.`;
 
   try {
     const res = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -35,7 +35,7 @@ async function fetchDefinition(word, sentence) {
       let msg = "Unexpected error.";
       try {
         msg = JSON.parse(body)?.error?.message || msg;
-      } catch {}
+      } catch (_) {}
       throw new Error(`OpenAI error ${res.status}: ${msg}`);
     }
 
@@ -88,7 +88,9 @@ function walkAndWrap(root) {
           !parent ||
           parent.classList.contains("df-word") ||
           /^(SCRIPT|STYLE|NOSCRIPT|CODE|PRE|TEXTAREA)$/i.test(parent.tagName)
-        ) return NodeFilter.FILTER_REJECT;
+        ) {
+          return NodeFilter.FILTER_REJECT;
+        }
 
         return NodeFilter.FILTER_ACCEPT;
       }
@@ -154,9 +156,61 @@ document.addEventListener("click", async (event) => {
   }
 });
 
-/** START */
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", () => walkAndWrap(document.body));
-} else {
+/* ------------------------------------------------------------------
+ *   TOGGLE SUPPORT
+ * -----------------------------------------------------------------*/
+let explainerEnabled = false;   // current on/off state in this tab
+let liveObserver = null;        // MutationObserver instance
+let unwrapCleanup = null;       // will be assigned a function that reverts DOM
+
+// Bootstrap – read stored preference, then start if enabled
+chrome.storage.sync.get({ explainerEnabled: true }, ({ explainerEnabled: on }) => {
+  explainerEnabled = on;
+  if (on) enableExplainer();
+});
+
+// Listen for messages from popup / background
+chrome.runtime.onMessage.addListener((msg) => {
+  if (msg.type !== "toggleExplainer") return;
+
+  if (msg.enabled && !explainerEnabled) {
+    explainerEnabled = true;
+    enableExplainer();
+  } else if (!msg.enabled && explainerEnabled) {
+    explainerEnabled = false;
+    disableExplainer();
+  }
+});
+
+/* ------------------ enable / disable ------------------ */
+function enableExplainer() {
+  // 1️⃣ wrap existing content
   walkAndWrap(document.body);
+
+  // 2️⃣ observe future DOM additions
+  liveObserver = new MutationObserver((mutations) => {
+    for (const mutation of mutations) {
+      for (const node of mutation.addedNodes) {
+        if (node.nodeType === Node.ELEMENT_NODE) walkAndWrap(node);
+      }
+    }
+  });
+
+  liveObserver.observe(document.body, { childList: true, subtree: true });
+
+  // 3️⃣ prepare cleanup
+  unwrapCleanup = () => {
+    liveObserver?.disconnect();
+    liveObserver = null;
+
+    // unwrap all df-word spans
+    document.querySelectorAll(".df-word").forEach((span) => {
+      span.replaceWith(document.createTextNode(span.textContent));
+    });
+  };
+}
+
+function disableExplainer() {
+  unwrapCleanup?.();
+  unwrapCleanup = null;
 }
