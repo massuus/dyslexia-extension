@@ -117,22 +117,45 @@
 .swatch[data-active="true"] { border-color:var(--c-accent); }
 body.blocked .card { opacity:.4; pointer-events:none; }
 
-.card.column { flex-direction: column; }
+.card.column { 
+  flex-direction: column;
+  gap: 14px;
+}
 .card label   { font-size:12px; display:flex; justify-content:space-between; }
 .card input[type=range] { width:120px; }
 select { padding:4px 6px; border:1px solid var(--c-border); border-radius:6px; }
 button.mini { align-self:flex-start; font-size:11px; padding:4px 8px; }
 
 
+  .overlay-title {
+    gap: 4px;
+  }
+  .explanation-text {
+    font-size: 12px;
+    opacity: 0.75;
+  }
+  .gap-4 {
+    gap: 4px;
+  }
+  .label-font-family {
+    display: block;
+    font-size: 12px;
+    opacity: 0.75;
+    margin-bottom: 2px;
+  }
+  .soften-glare-text {
+    font-size: 12px;
+    opacity: 0.75;
+  }
   </style>
 </head>
 <body>
   <div class="card">
-    <div class="txt">
-      <h1>
-        Dyslexia NLP Helper
+      <div class="explanation-text">
+        Word explanations
+      </div>
       </h1>
-      <div style="font-size:12px;opacity:.75">
+      <div class="explanation-text">
         Word explanations
       </div>
     </div>
@@ -143,25 +166,25 @@ button.mini { align-self:flex-start; font-size:11px; padding:4px 8px; }
       <span class="slider"></span>
     </label>
   </div>
-  <!-- Pastel overlay picker -->
-<div class="card">
-  <div class="txt">
-    <h1 style="gap:4px">
+    <h1 class="gap-4">
+      Overlay
+    <div class="soften-glare-text">Soften background glare</div>
+    <h1 class="gap-4">
       Overlay
     </h1>
-    <div style="font-size:12px;opacity:.75">Soften background glare</div>
+    <div class="soften-glare-text">Soften background glare</div>
   </div>
 
   <div id="swatch-wrap">
     <!-- swatches will be injected by popup.js -->
   </div>
-</div>
+    <label for="fontSelect" class="label-font-family">Font family</label>
 
 <!-- Typography -->
-<div class="card column" style="gap:14px">
+<div class="card column">
   <div class="row">
     <h1>Typography</h1>
-    <label for="fontSelect" style="display:block;font-size:12px;opacity:.75;margin-bottom:2px;">Font family</label>
+    <label for="fontSelect" class="label-font-family">Font family</label>
     <select id="fontSelect">
       <option value="inherit">Default</option>
       <option value="'OpenDyslexic',sans-serif">OpenDyslexic</option>

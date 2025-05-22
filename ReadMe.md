@@ -1,62 +1,64 @@
-# Dyslexia-NLP Extension
+# Dyslexia-NLP Helper (MVP)
 
-A Chrome browser extension that helps users with dyslexia by **explaining difficult words using AI-powered definitions** based on their context within a sentence. This improves comprehension and makes reading more accessible.
+Chrome-/Edge-compatible extension that makes any web page easier to read for
+people with dyslexia or low literacy by **explaining difficult words in-place
+with AI and letting the reader tune colours & typography**.
 
-Made by: Sam van Remortel
-
----
-
-## ✨ Features
-
-* ✅ **Click-to-Explain**: Tap on underlined complex words to see a short, contextual explanation.
-* 🧠 **AI-powered NLP**: Uses OpenAI's language model to generate brief definitions based on sentence context.
-* ⚡ **Real-time Tooltip**: Instant feedback with tooltips that appear directly next to the word.
-* 💾 **Smart Caching**: Previously explained words are remembered to save time and reduce API usage.
+Built by **Sam van Remortel**.
 
 ---
 
-## 📦 Installation
+## ✨ Current feature set
 
-1. **Clone or download** this repository.
-
-2. Create a file called `secret.js` in the root folder of the extension with the following content:
-
-   ```js
-   const OPENAI_KEY = "your_openai_api_key_here";
-   ```
-
-3. Make sure `secret.js` is listed in `.gitignore` (it already is).
-
-4. Open **Chrome** and go to `chrome://extensions`.
-
-5. Enable **Developer Mode** (toggle in the top-right).
-
-6. Click **"Load unpacked"** and select the folder containing this project.
+| Category | What it does |
+|----------|--------------|
+| **Lexical help** | • Click an underlined word → get a ≤ 15-word, context-aware explanation.<br>• Explanations are generated with OpenAI GPT-4.1-nano.<br>• `IndexedDB` + in-memory cache avoid repeat calls per *word × sentence*. |
+| **Visual comfort** | • **Pastel overlay** palette softens page glare.<br>• **Font switcher**: Default / OpenDyslexic / Lexend Deca.<br>• Live sliders for letter-spacing, word-spacing and line-height. |
+| **Controls** | • Toolbar popup with an **on/off master switch**.<br>• All settings are saved in `chrome.storage.sync` and follow you across tabs and devices. |
+| **Performance** | • Text wrapping runs only when enabled.<br>• Definitions are fetched once, cached forever (unless you clear site data). |
 
 ---
 
-## 🧑‍🏫 Usage
+## 📦 Installation (developer build)
 
-1. Visit any webpage after installing the extension.
-2. The extension automatically underlines complex words (words not in the common words list).
-3. **Click** on an underlined word to get an explanation tooltip generated using OpenAI.
+1. Clone or download this repo.
+2. **Add your OpenAI key**  
+   ```shell
+   cp secret.example.js secret.js
+   # then paste your key inside secret.js:
+   # const OPENAI_KEY = "sk-XXXXXXXXXXXXXXXXXXXXXXXX";
+
+3. Visit `chrome://extensions` (or `edge://extensions`) → enable **Developer Mode** →
+   press **“Load unpacked”** and select the project folder.
+
+> **Heads-up:** the model used (`gpt-4.1-nano`) is small and cheap but still
+> costs money. Set a spending cap in your OpenAI dashboard.
 
 ---
 
-## 🛠 Configuration
+## 🧑‍🏫 How to use
 
-* Do **not** hardcode the API key into `content.js`.
-* Instead, use the included `secret.js` mechanism to securely keep your key out of version control.
-* Optionally, copy `secret.example.js` and rename it to `secret.js` to get started quickly.
+1. Browse any normal website (HTTP/S).
+2. Underlined words mark potential stumbling blocks.
+3. Click a word → tooltip pops up with an explanation.
+4. Open the extension’s popup to:
 
-> ⚠️ **Never commit your OpenAI API key to GitHub or any public repository.**
+   * toggle the helper on/off
+   * pick a background tint
+   * change font or spacing
+5. All choices stick until you change them.
 
 ---
 
-## 🙋 FAQ
+## 🔧 Developer notes
 
-**Q: What words get tooltips?**
-A: Words that are longer and not in the top 100 most common English words list.
+* **No keys in source:** `secret.js` is git-ignored.
+* **Fonts:** `OpenDyslexic-Regular.woff2` and `LexendDeca-VariableFont.woff2`
+  are shipped inside `/assets/fonts` and referenced with `chrome.runtime.getURL`.
+* **Manifest v3** — background-less; everything runs in the content script.
+* **Caching layers:**
 
-**Q: Can I add custom words?**
-A: Yes, edit the `COMMON_WORDS` list in `common-words.js` to control which words are skipped.
+  1. **Map** in the current tab (fastest)
+  2. **IndexedDB** (`defs` store, compound key `[word, sentence]`)
+  3. **OpenAI** API call (last resort)
+
