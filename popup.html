@@ -3,210 +3,154 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Dyslexia NLP Helper</title>
+  <title>Dyslexia-NLP Helper</title>
 
   <style>
-    :root {
-      --c-bg:      #f9fafb;
-      --c-card:    #ffffff;
-      --c-text:    #111827;
-      --c-accent:  #2563eb; /* indigo‑600 */
-      --c-border:  #e5e7eb;
-      --radius:    14px;
+    :root{
+      --c-bg:#f9fafb;
+      --c-card:#ffffff;
+      --c-text:#111827;
+      --c-accent:#2563eb;         /* indigo-600 */
+      --c-border:#e5e7eb;
+      --radius:14px;
     }
-
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --c-bg:     #111827;
-        --c-card:   #1f2937;
-        --c-text:   #f3f4f6;
-        --c-border: #374151;
+    @media (prefers-color-scheme: dark){
+      :root{
+        --c-bg:#111827;
+        --c-card:#1f2937;
+        --c-text:#f3f4f6;
+        --c-border:#374151;
       }
     }
 
-    html,body { margin:0; padding:0; background:var(--c-bg); }
-    body {
-      font: 14px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-      color: var(--c-text);
-      min-width: 260px;
-      padding: 18px 20px 22px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
+    html,body{margin:0;padding:0;background:var(--c-bg)}
+    body{
+      font:14px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+      color:var(--c-text);
+      min-width:260px;
+      padding:18px 20px 22px;
+      display:flex;
+      flex-direction:column;
+      gap:16px;
     }
 
-    /* ───── CARD ───── */
-    .card {
-      background: var(--c-card);
-      border: 1px solid var(--c-border);
-      border-radius: var(--radius);
-      padding: 18px 20px 22px;
-      box-shadow: 0 4px 16px rgba(0,0,0,.06);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 18px;
+    /* ───── card ───── */
+    .card{
+      background:var(--c-card);
+      border:1px solid var(--c-border);
+      border-radius:var(--radius);
+      padding:18px 20px 22px;
+      box-shadow:0 4px 16px rgba(0,0,0,.06);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:18px;
+    }
+    .card.column{flex-direction:column;gap:14px}
+
+    .row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+    .column{display:flex;flex-direction:column}
+
+    h1{
+      font-size:15px;font-weight:600;margin:0 0 2px;
+      display:flex;align-items:center;gap:6px;
     }
 
-    h1 {
-      font-size: 15px;
-      font-weight: 600;
-      margin: 0 0 2px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
+    /* ───── pretty toggle ───── */
+    .switch{--w:44px;--h:24px;position:relative;display:inline-block;width:var(--w);height:var(--h)}
+    .switch input{display:none}
+    .slider{position:absolute;cursor:pointer;inset:0;background:#d1d5db;border-radius:var(--h);transition:background .25s}
+    .slider::before{
+      content:"";position:absolute;height:calc(var(--h) - 8px);width:calc(var(--h) - 8px);
+      left:4px;top:4px;background:#fff;border-radius:50%;transition:transform .25s;
+      box-shadow:0 1px 3px rgba(0,0,0,.25);
     }
-    h1 svg {
-      width: 18px; height: 18px;
-      fill: var(--c-accent);
+    input:checked + .slider{background:var(--c-accent)}
+    input:checked + .slider::before{transform:translateX(calc(var(--w) - var(--h)))}
+
+    /* ───── overlay swatches ───── */
+    .swatch{
+      width:22px;height:22px;border-radius:50%;
+      cursor:pointer;border:2px solid transparent;transition:border .15s;
     }
+    .swatch[data-active="true"]{border-color:var(--c-accent)}
 
-    /* ───── NICE TOGGLE ───── */
-    .switch {
-      --w: 44px;
-      --h: 24px;
-      position: relative;
-      display: inline-block;
-      width: var(--w);
-      height: var(--h);
-    }
+    /* ───── typography sliders ───── */
+    .card label{font-size:12px;display:flex;justify-content:space-between}
+    .card input[type=range]{width:120px}
+    select{padding:4px 6px;border:1px solid var(--c-border);border-radius:6px}
+    button.mini{align-self:flex-start;font-size:11px;padding:4px 8px}
 
-    .switch input { display:none; }
-
-    .slider {
-      position: absolute;
-      cursor: pointer;
-      inset: 0;
-      background: #d1d5db; /* gray‑300 */
-      border-radius: var(--h);
-      transition: background .25s;
-    }
-    .slider::before {
-      content: "";
-      position: absolute;
-      height: calc(var(--h) - 8px);
-      width:  calc(var(--h) - 8px);
-      left: 4px;
-      top: 4px;
-      background: #ffffff;
-      border-radius: 50%;
-      transition: transform .25s;
-      box-shadow: 0 1px 3px rgba(0,0,0,.25);
-    }
-
-    input:checked + .slider {
-      background: var(--c-accent);
-    }
-    input:checked + .slider::before {
-      transform: translateX(calc(var(--w) - var(--h)));
-    }
-
-    /* ───── FOOTER (credit) ───── */
-    .credits {
-      text-align: center;
-      font-size: 11px;
-      opacity: .6;
-    }
-    .credits a { color: inherit; }
-
-    .swatch {
-  width:22px;height:22px;border-radius:50%;
-  cursor:pointer;border:2px solid transparent;
-  transition:border .15s;
-}
-.swatch[data-active="true"] { border-color:var(--c-accent); }
-body.blocked .card { opacity:.4; pointer-events:none; }
-
-.card.column { 
-  flex-direction: column;
-  gap: 14px;
-}
-.card label   { font-size:12px; display:flex; justify-content:space-between; }
-.card input[type=range] { width:120px; }
-select { padding:4px 6px; border:1px solid var(--c-border); border-radius:6px; }
-button.mini { align-self:flex-start; font-size:11px; padding:4px 8px; }
-
-
-  .overlay-title {
-    gap: 4px;
-  }
-  .explanation-text {
-    font-size: 12px;
-    opacity: 0.75;
-  }
-  .gap-4 {
-    gap: 4px;
-  }
-  .label-font-family {
-    display: block;
-    font-size: 12px;
-    opacity: 0.75;
-    margin-bottom: 2px;
-  }
-  .soften-glare-text {
-    font-size: 12px;
-    opacity: 0.75;
-  }
+    /* ───── misc ───── */
+    .explanation-text,.soften-glare-text{font-size:12px;opacity:.75}
+    .credits{text-align:center;font-size:11px;opacity:.6}
+    .credits a{color:inherit}
+    body.blocked .card{opacity:.4;pointer-events:none}
   </style>
 </head>
 <body>
+
+  <!-- 1️⃣  Word-explanation toggle -->
   <div class="card">
-      <div class="explanation-text">
-        Word explanations
-      </div>
-      </h1>
-      <div class="explanation-text">
-        Word explanations
-      </div>
+    <div class="column">
+      <h1>Dyslexia-NLP Helper</h1>
+      <div class="explanation-text">Word explanations</div>
     </div>
 
-    <!-- pretty toggle -->
     <label class="switch">
       <input id="toggle" type="checkbox">
       <span class="slider"></span>
     </label>
   </div>
-    <h1 class="gap-4">
-      Overlay
-    <div class="soften-glare-text">Soften background glare</div>
-    <h1 class="gap-4">
-      Overlay
-    </h1>
-    <div class="soften-glare-text">Soften background glare</div>
+
+  <!-- 2️⃣  Pastel overlay picker -->
+  <div class="card">
+    <div class="column">
+      <h1 class="overlay-title">Overlay</h1>
+      <div class="soften-glare-text">Soften background glare</div>
+    </div>
+
+    <div id="swatch-wrap"><!-- injected by popup.js --></div>
   </div>
 
-  <div id="swatch-wrap">
-    <!-- swatches will be injected by popup.js -->
+  <!-- 3️⃣  Typography panel -->
+  <div class="card column">
+    <div class="row">
+      <div class="column">
+        <h1>Typography</h1>
+        <span class="explanation-text">Font & spacing</span>
+      </div>
+
+      <select id="fontSelect">
+        <option value="inherit">Default</option>
+        <option value="'OpenDyslexic',sans-serif">OpenDyslexic</option>
+        <option value="'LexendDeca',sans-serif">Lexend Deca</option>
+      </select>
+    </div>
+
+    <label>Letter-spacing
+      <input type="range" id="ls" min="0" max="3" step=".1">
+    </label>
+
+    <label>Word-spacing
+      <input type="range" id="ws" min="0" max="6" step=".2">
+    </label>
+
+    <label>Line-height
+      <input type="range" id="lh" min="1.0" max="2.0" step=".05">
+    </label>
+
+    <button id="resetTypo" class="mini">Reset</button>
   </div>
-    <label for="fontSelect" class="label-font-family">Font family</label>
 
-<!-- Typography -->
-<div class="card column">
-  <div class="row">
-    <h1>Typography</h1>
-    <label for="fontSelect" class="label-font-family">Font family</label>
-    <select id="fontSelect">
-      <option value="inherit">Default</option>
-      <option value="'OpenDyslexic',sans-serif">OpenDyslexic</option>
-      <option value="'LexendDeca',sans-serif">Lexend Deca</option>
-    </select>
+  <div class="card">
+    <div class="column">
+      <h1>Refresh</h1>
+      <span class="explanation-text">If the page does not update, do Ctrl+R</span>
+    </div>
   </div>
 
-  <label>Letter-spacing
-    <input type="range" id="ls"  min="0"  max="3" step=".1">
-  </label>
-
-  <label>Word-spacing
-    <input type="range" id="ws"  min="0"  max="6" step=".2">
-  </label>
-
-  <label>Line-height
-    <input type="range" id="lh"  min="1.0" max="2.0" step=".05">
-  </label>
-
-  <button id="resetTypo" class="mini">Reset</button>
-</div>
-
+  <!-- footer -->
   <div class="credits">
     v0.2 · Made with ✨Procrastination✨ <br> by Sam van Remortel
   </div>
