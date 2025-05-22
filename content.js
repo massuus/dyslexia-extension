@@ -1,27 +1,25 @@
-/* ---- Dyslexia-NLP: click-to-explain  ------------------ */
+// ----------------- Dyslexia-NLP: Click-to-Explain -----------------
 
-/* 1. CONFIG  */
-const MODEL = "gpt-4.1-nano"; // Most cost-effective OpenAI model
-const temperature = 0.2;      // Lower temperature for more deterministic output
-const max_tokens = 60;        // Limit response length
-const defs = new Map();       // Cache for word ➜ explanation
+// CONFIG
+const MODEL = "gpt-4.1-nano";
+const temperature = 0.2;
+const max_tokens = 60;
+const defs = new Map(); // word ➜ explanation cache
 
-/* 2. UTILITIES */
+/** UTIL: determine if a word is uncommon and difficult */
 function isDifficult(word) {
-  return (
-    !COMMON_WORDS.has(word.toLowerCase()) &&
-    /^[A-Za-z]+$/.test(word)
-  );
+  return !COMMON_WORDS.has(word.toLowerCase()) && /^[A-Za-z]+$/.test(word);
 }
 
+/** API: fetch definition from OpenAI */
 async function fetchDefinition(word, sentence) {
   const prompt = `Given the sentence: "${sentence}", explain the meaning of the word "${word}" in the same language as the sentence. Keep the explanation contextual and under 15 words.`;
 
   try {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    const res = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${OPENAI_KEY}`,
+        "Authorization": `Bearer ${OPENAI_KEY}`, // define this in your secret.js
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
@@ -32,92 +30,133 @@ async function fetchDefinition(word, sentence) {
       })
     });
 
-    const body = await response.text();
-
-    if (!response.ok) {
-      // Optional: parse JSON if valid
-      let message = "Unexpected error.";
+    const body = await res.text();
+    if (!res.ok) {
+      let msg = "Unexpected error.";
       try {
-        const errJson = JSON.parse(body);
-        message = errJson?.error?.message || message;
+        msg = JSON.parse(body)?.error?.message || msg;
       } catch {}
-      throw new Error(`OpenAI error ${response.status}: ${message}`);
+      throw new Error(`OpenAI error ${res.status}: ${msg}`);
     }
 
-    const data = JSON.parse(body);
-    return data.choices?.[0]?.message?.content?.trim() || "";
-  } catch (error) {
-    console.error("fetchDefinition failed:", error.message);
+    return JSON.parse(body).choices?.[0]?.message?.content?.trim() || "";
+  } catch (e) {
+    console.error("fetchDefinition failed:", e.message);
     return null;
   }
 }
 
-/* 3. TEXT WRAPPING */
-function wrapText(node) {
-  if (node.nodeType === Node.TEXT_NODE) {
-    const parent = node.parentNode;
-    const text = node.nodeValue;
-    const parts = text.split(/(\b[A-Za-z]{8,}\b)/);
+/** TEXT WRAPPING: wrap difficult words with span tooltips */
+function wrapTextFast(node) {
+  const parent = node.parentNode;
+  if (!parent || parent.closest(".df-word")) return;
 
-    if (parts.length === 1) return;
+  const text = node.nodeValue;
+  const parts = text.split(/(\b[A-Za-z]{8,}\b)/);
+  if (parts.length <= 1 || !parts.some(isDifficult)) return;
 
-    const fragment = document.createDocumentFragment();
-    for (const part of parts) {
-      if (isDifficult(part)) {
-        const span = document.createElement("span");
-        span.className = "df-word";
-        span.textContent = part;
-        span.dataset.word = part;
-        span.dataset.sent = encodeURIComponent(text.trim());
-        fragment.appendChild(span);
-      } else {
-        fragment.appendChild(document.createTextNode(part));
-      }
+  const frag = document.createDocumentFragment();
+  const sentence = encodeURIComponent(text.trim());
+
+  for (const part of parts) {
+    if (isDifficult(part)) {
+      const span = document.createElement("span");
+      span.className = "df-word";
+      span.textContent = part;
+      span.dataset.word = part;
+      span.dataset.sent = sentence;
+      frag.appendChild(span);
+    } else {
+      frag.appendChild(document.createTextNode(part));
     }
-    parent.replaceChild(fragment, node);
-  } else if (
-    node.nodeType === Node.ELEMENT_NODE &&
-    !/^(SCRIPT|STYLE|NOSCRIPT|CODE|PRE)$/i.test(node.tagName)
-  ) {
-    for (const child of [...node.childNodes]) wrapText(child);
   }
+
+  parent.replaceChild(frag, node);
 }
 
-wrapText(document.body);
+/** TREE WALKER: find all visible eligible text nodes */
+function walkAndWrap(root) {
+  const walker = document.createTreeWalker(
+    root,
+    NodeFilter.SHOW_TEXT,
+    {
+      acceptNode(node) {
+        const parent = node.parentNode;
 
-/* 4. INTERACTION HANDLER */
+        if (
+          !node.nodeValue.trim() ||
+          !parent ||
+          parent.classList.contains("df-word") ||
+          /^(SCRIPT|STYLE|NOSCRIPT|CODE|PRE|TEXTAREA)$/i.test(parent.tagName)
+        ) return NodeFilter.FILTER_REJECT;
+
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    }
+  );
+
+  const batch = [];
+  let node;
+  while ((node = walker.nextNode())) batch.push(node);
+  batch.forEach(wrapTextFast);
+}
+
+/** TOOLTIP: show near word */
+function showTip(wordEl, text) {
+  let tip = wordEl.querySelector(".df-tooltip-text");
+
+  if (!tip) {
+    tip = document.createElement("span");
+    tip.className = "df-tooltip-text";
+
+    const closeBtn = document.createElement("button");
+    closeBtn.className = "df-tooltip-close";
+    closeBtn.innerHTML = "&times;";
+    tip.appendChild(closeBtn);
+
+    const textSpan = document.createElement("span");
+    textSpan.className = "df-tooltip-content";
+    textSpan.textContent = text;
+    tip.appendChild(textSpan);
+
+    wordEl.appendChild(tip);
+  } else {
+    tip.querySelector(".df-tooltip-content").textContent = text;
+  }
+
+  wordEl.classList.add("df-show");
+}
+
+/** CLICK HANDLING */
 document.addEventListener("click", async (event) => {
+  // Handle close button
+  if (event.target.classList.contains("df-tooltip-close")) {
+    const tip = event.target.closest(".df-tooltip-text");
+    const wordEl = tip?.closest(".df-word");
+    wordEl?.classList.remove("df-show");
+    return;
+  }
+
+  // Handle word click
   const el = event.target.closest(".df-word");
   if (!el) return;
 
   const word = el.dataset.word;
+  const sentence = decodeURIComponent(el.dataset.sent);
 
   if (defs.has(word)) {
     showTip(el, defs.get(word));
-    return;
+  } else {
+    showTip(el, "Loading…");
+    const def = await fetchDefinition(word, sentence);
+    defs.set(word, def || "No definition found.");
+    showTip(el, defs.get(word));
   }
-
-  showTip(el, "Loading…");
-
-  try {
-    const sentence = decodeURIComponent(el.dataset.sent);
-    const definition = await fetchDefinition(word, sentence);
-    defs.set(word, definition || "No definition found.");
-  } catch (err) {
-    defs.set(word, "Definition unavailable.");
-    console.warn(err);
-  }
-
-  showTip(el, defs.get(word));
 });
 
-/* 5. TOOLTIP DISPLAY */
-function showTip(wordEl, text) {
-  let tip = wordEl.querySelector(".df-tooltip-text");
-  if (!tip) {
-    tip = document.createElement("span");
-    tip.className = "df-tooltip-text";
-    wordEl.appendChild(tip);
-  }
-  tip.textContent = text;
-  wordEl.classList.add("df-show");}
+/** START */
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", () => walkAndWrap(document.body));
+} else {
+  walkAndWrap(document.body);
+}
