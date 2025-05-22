@@ -3,6 +3,7 @@
 A Chrome browser extension that helps users with dyslexia by **explaining difficult words using AI-powered definitions** based on their context within a sentence. This improves comprehension and makes reading more accessible.
 
 Made by: Sam van Remortel
+
 ---
 
 ## ✨ Features
@@ -17,9 +18,20 @@ Made by: Sam van Remortel
 ## 📦 Installation
 
 1. **Clone or download** this repository.
-2. Open **Chrome** and go to `chrome://extensions`.
-3. Enable **Developer Mode** (toggle in the top-right).
-4. Click **"Load unpacked"** and select the folder containing this project.
+
+2. Create a file called `secret.js` in the root folder of the extension with the following content:
+
+   ```js
+   const OPENAI_KEY = "your_openai_api_key_here";
+   ```
+
+3. Make sure `secret.js` is listed in `.gitignore` (it already is).
+
+4. Open **Chrome** and go to `chrome://extensions`.
+
+5. Enable **Developer Mode** (toggle in the top-right).
+
+6. Click **"Load unpacked"** and select the folder containing this project.
 
 ---
 
@@ -33,21 +45,18 @@ Made by: Sam van Remortel
 
 ## 🛠 Configuration
 
-* Replace the placeholder in `content.js` with your actual OpenAI API key:
+* Do **not** hardcode the API key into `content.js`.
+* Instead, use the included `secret.js` mechanism to securely keep your key out of version control.
+* Optionally, copy `secret.example.js` and rename it to `secret.js` to get started quickly.
 
-  ```js
-  const OPENAI_KEY = "YOUR_OPENAI_API_KEY_HERE";
-  ```
-
-> ⚠️ **Never share your API key in public repositories.** 
+> ⚠️ **Never commit your OpenAI API key to GitHub or any public repository.**
 
 ---
 
 ## 🙋 FAQ
 
 **Q: What words get tooltips?**
-A: Words that aren’t in the top 100 common English words list.
+A: Words that are longer and not in the top 100 most common English words list.
 
 **Q: Can I add custom words?**
-A: You can edit the `COMMON_WORDS` list in `common-words.js` to fine-tune which words are skipped.
-
+A: Yes, edit the `COMMON_WORDS` list in `common-words.js` to control which words are skipped.
