@@ -1,4 +1,4 @@
-# Dyslexia-NLP Helper (MVP)
+# Dyslexia Extension v0.3 
 
 A Chrome/Edge-compatible extension that makes any webpage easier to read for
 people with dyslexia or low literacy by **explaining difficult words in-place**
