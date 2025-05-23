@@ -1,0 +1,232 @@
+/* ───────── ROOT VARIABLES ───────── */
+:root {
+  --c-bg: #f9fafb;
+  --c-card: #ffffff;
+  --c-text: #111827;
+  --c-accent: #2563eb; /* indigo-600 */
+  --c-border: #e5e7eb;
+  --radius: 14px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --c-bg: #111827;
+    --c-card: #1f2937;
+    --c-text: #f3f4f6;
+    --c-border: #374151;
+  }
+}
+
+/* ───────── GLOBAL RESET & BASE ───────── */
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--c-bg);
+}
+
+body {
+  font: 14px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: var(--c-text);
+  min-width: 260px;
+  padding: 18px 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.visually-hidden {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+/* ───────── TYPOGRAPHY ───────── */
+h1 {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0 0 2px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.explanation-text,
+.soften-glare-text {
+  font-size: 12px;
+  opacity: 0.75;
+}
+
+.credits {
+  text-align: center;
+  font-size: 11px;
+  opacity: 0.6;
+}
+
+.credits a {
+  color: inherit;
+}
+
+/* ───────── FLEX LAYOUT UTILS ───────── */
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ───────── CARD CONTAINER ───────── */
+.card {
+  background: var(--c-card);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius);
+  padding: 18px 20px 22px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.card.column {
+  flex-direction: column;
+  gap: 14px;
+}
+
+body.blocked .card {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* ───────── SWITCH TOGGLE ───────── */
+.switch {
+  --w: 44px;
+  --h: 24px;
+  position: relative;
+  display: inline-block;
+  width: var(--w);
+  height: var(--h);
+}
+
+.switch input {
+  display: none;
+}
+
+.slider {
+  position: absolute;
+  inset: 0;
+  cursor: pointer;
+  background: #d1d5db;
+  border-radius: var(--h);
+  transition: background 0.25s;
+}
+
+.slider::before {
+  content: "";
+  position: absolute;
+  height: calc(var(--h) - 8px);
+  width: calc(var(--h) - 8px);
+  left: 4px;
+  top: 4px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  transition: transform 0.25s;
+}
+
+input:checked + .slider {
+  background: var(--c-accent);
+}
+
+input:checked + .slider::before {
+  transform: translateX(calc(var(--w) - var(--h)));
+}
+
+/* ───────── OVERLAY SWATCHES ───────── */
+.swatch {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: border 0.15s;
+}
+
+.swatch[data-active="true"] {
+  border-color: var(--c-accent);
+}
+
+/* ───────── TYPOGRAPHY SLIDERS ───────── */
+.card label {
+  font-size: 12px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.card input[type="range"] {
+  width: 120px;
+}
+
+select {
+  padding: 6px 10px;
+  padding-right: 28px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius);
+  background-color: var(--c-card);
+  color: var(--c-text);
+  font-size: 13px;
+  font-weight: 500;
+  transition: border 0.2s, background 0.2s;
+  appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg fill='%23111827' height='16' viewBox='0 0 24 24' width='16' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 12px;
+}
+
+/* ───────── BUTTONS ───────── */
+button.mini {
+  margin-top: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 12px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius);
+  background: var(--c-bg);
+  color: var(--c-text);
+  cursor: pointer;
+  transition: background 0.2s, border 0.2s;
+}
+
+button.mini:hover {
+  background: var(--c-accent);
+  color: white;
+  border-color: var(--c-accent);
+}
+
+.popup-btn {
+  width: 100%;
+  padding: 10px 12px;
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--c-text);
+  background: var(--c-bg);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background 0.2s, border 0.2s;
+}
+
+.popup-btn:hover {
+  background: var(--c-accent);
+  color: white;
+  border-color: var(--c-accent);
+}

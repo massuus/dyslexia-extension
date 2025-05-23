@@ -2,187 +2,41 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Dyslexia-NLP Helper</title>
-
-  <style>
-    :root{
-      --c-bg:#f9fafb;
-      --c-card:#ffffff;
-      --c-text:#111827;
-      --c-accent:#2563eb;         /* indigo-600 */
-      --c-border:#e5e7eb;
-      --radius:14px;
-    }
-    @media (prefers-color-scheme: dark){
-      :root{
-        --c-bg:#111827;
-        --c-card:#1f2937;
-        --c-text:#f3f4f6;
-        --c-border:#374151;
-      }
-    }
-
-    .visually-hidden {
-      position: absolute;
-      left: -9999px;
-      top: auto;
-      width: 1px;
-      height: 1px;
-      overflow: hidden;
-    }
-
-    html,body{margin:0;padding:0;background:var(--c-bg)}
-    body{
-      font:14px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
-      color:var(--c-text);
-      min-width:260px;
-      padding:18px 20px 22px;
-      display:flex;
-      flex-direction:column;
-      gap:16px;
-    }
-
-    /* ───── card ───── */
-    .card{
-      background:var(--c-card);
-      border:1px solid var(--c-border);
-      border-radius:var(--radius);
-      padding:18px 20px 22px;
-      box-shadow:0 4px 16px rgba(0,0,0,.06);
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:18px;
-    }
-    .card.column{flex-direction:column;gap:14px}
-
-    .row{display:flex;justify-content:space-between;align-items:center;gap:8px}
-    .column{display:flex;flex-direction:column}
-
-    h1{
-      font-size:15px;font-weight:600;margin:0 0 2px;
-      display:flex;align-items:center;gap:6px;
-    }
-
-    /* ───── pretty toggle ───── */
-    .switch{--w:44px;--h:24px;position:relative;display:inline-block;width:var(--w);height:var(--h)}
-    .switch input{display:none}
-    .slider{position:absolute;cursor:pointer;inset:0;background:#d1d5db;border-radius:var(--h);transition:background .25s}
-    .slider::before{
-      content:"";position:absolute;height:calc(var(--h) - 8px);width:calc(var(--h) - 8px);
-      left:4px;top:4px;background:#fff;border-radius:50%;transition:transform .25s;
-      box-shadow:0 1px 3px rgba(0,0,0,.25);
-    }
-    input:checked + .slider{background:var(--c-accent)}
-    input:checked + .slider::before{transform:translateX(calc(var(--w) - var(--h)))}
-
-    /* ───── overlay swatches ───── */
-    .swatch{
-      width:22px;height:22px;border-radius:50%;
-      cursor:pointer;border:2px solid transparent;transition:border .15s;
-    }
-    .swatch[data-active="true"]{border-color:var(--c-accent)}
-
-    /* ───── typography sliders ───── */
-    .card label{font-size:12px;display:flex;justify-content:space-between}
-    .card input[type=range]{width:120px}
-    select {
-  padding: 6px 10px;
-  border: 1px solid var(--c-border);
-  border-radius: var(--radius);
-  background-color: var(--c-card);
-  color: var(--c-text);
-  font-size: 13px;
-  font-weight: 500;
-  transition: border 0.2s, background 0.2s;
-  appearance: none;
-  background-image: url("data:image/svg+xml;utf8,<svg fill='%23111827' height='16' viewBox='0 0 24 24' width='16' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-  background-size: 12px;
-  padding-right: 28px;
-}
-
-    button.mini {
-  margin-top: 8px;
-  font-size: 13px;
-  font-weight: 500;
-  padding: 6px 12px;
-  border: 1px solid var(--c-border);
-  border-radius: var(--radius);
-  background: var(--c-bg);
-  color: var(--c-text);
-  cursor: pointer;
-  transition: background 0.2s, border 0.2s;
-}
-
-button.mini:hover {
-  background: var(--c-accent);
-  color: white;
-  border-color: var(--c-accent);
-}
-
-
-    /* ───── misc ───── */
-    .explanation-text,.soften-glare-text{font-size:12px;opacity:.75}
-    .credits{text-align:center;font-size:11px;opacity:.6}
-    .credits a{color:inherit}
-    body.blocked .card{opacity:.4;pointer-events:none}
-
-    .popup-btn {
-  width: 100%;
-  padding: 10px 12px;
-  margin-top: 4px;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--c-text);
-  background: var(--c-bg);
-  border: 1px solid var(--c-border);
-  border-radius: var(--radius);
-  cursor: pointer;
-  transition: background 0.2s, border 0.2s;
-}
-
-.popup-btn:hover {
-  background: var(--c-accent);
-  color: white;
-  border-color: var(--c-accent);
-}
-
-  </style>
+  <link rel="stylesheet" href="popup.css" />
 </head>
 <body>
 
-  <!-- 1️⃣  Word-explanation toggle -->
+  <!-- 🔠 Word-explanation toggle -->
   <div class="card">
     <div class="column">
-      <h1>Dyslexia-NLP Helper</h1>
-      <div class="explanation-text">Word explanations</div>
+      <h1>Word explanations</h1>
+      <div class="explanation-text">Enable or disable word explanations</div>
     </div>
-
-    <label class="switch">
-      <input id="toggle" type="checkbox">
+    <label class="switch" for="toggle">
+      <input id="toggle" type="checkbox" title="Toggle word explanations" />
       <span class="slider"></span>
+      <span class="visually-hidden">Toggle word explanations</span>
     </label>
   </div>
 
-<!-- 2️⃣  Pastel overlay picker -->
-<div class="card column">
-  <div class="row">
-    <div class="column">
-      <h1 class="overlay-title">Overlay</h1>
-      <div class="soften-glare-text">Soften background glare</div>
+  <!-- 🎨 Pastel overlay picker -->
+  <div class="card column">
+    <div class="row">
+      <div class="column">
+        <h1 class="overlay-title">Overlay</h1>
+        <div class="soften-glare-text">Soften background glare</div>
+      </div>
     </div>
+
+    <div id="swatch-wrap"><!-- injected by popup.js --></div>
+
+    <label for="tintIntensity">Intensity</label>
+    <input type="range" id="tintIntensity" min="0" max="100" step="1" value="22" />
   </div>
 
-  <div id="swatch-wrap"><!-- injected by popup.js --></div>
-
-  <label for="tintIntensity">Intensity</label>
-  <input type="range" id="tintIntensity" min="0" max="100" step="1" value="22">
-</div>
-
-  <!-- 3️⃣  Typography panel -->
+  <!-- ✍️ Typography panel -->
   <div class="card column">
     <div class="row">
       <div class="column">
@@ -199,41 +53,42 @@ button.mini:hover {
     </div>
 
     <label>Letter-spacing
-      <input type="range" id="ls" min="0" max="3" step=".1">
+      <input type="range" id="ls" min="0" max="3" step="0.1" />
     </label>
 
     <label>Word-spacing
-      <input type="range" id="ws" min="0" max="6" step=".2">
+      <input type="range" id="ws" min="0" max="6" step="0.2" />
     </label>
 
     <label>Line-height
-      <input type="range" id="lh" min="1.0" max="2.0" step=".05">
+      <input type="range" id="lh" min="1.0" max="2.0" step="0.05" />
     </label>
 
     <button id="resetTypo" class="mini">Reset</button>
   </div>
 
-  <!-- Bionic Reading -->
-<div class="card">
-  <div class="column">
-    <h1>Bionic Reading</h1>
-    <span class="soften-glare-text">Bold first half of every word</span>
+  <!-- 🧠 Bionic Reading -->
+  <div class="card">
+    <div class="column">
+      <h1>Bionic Reading</h1>
+      <span class="soften-glare-text">Bold first half of every word</span>
+    </div>
+    <label class="switch" for="brToggle">
+      <input id="brToggle" type="checkbox" title="Toggle Bionic Reading" />
+      <span class="slider"></span>
+      <span class="visually-hidden">Toggle Bionic Reading</span>
+    </label>
   </div>
 
-  <label class="switch">
-    <input id="brToggle" type="checkbox">
-    <span class="slider"></span>
-  </label>
-</div>
+  <!-- 🤖 AI Tools -->
+  <div class="card column">
+    <h1>AI Page Tools</h1>
+    <button class="popup-btn" id="embedBtn">📌 Embed Page</button>
+    <button class="popup-btn" id="askBtn">💬 Ask AI</button>
+    <button class="popup-btn" id="summarizeBtn">🧠 Summarize Page</button>
+  </div>
 
-<div class="card column">
-  <h1>AI Page Tools</h1>
-
-  <button class="popup-btn" id="embedBtn">📌 Embed Page</button>
-  <button class="popup-btn" id="askBtn">💬 Ask AI</button>
-  <button class="popup-btn" id="summarizeBtn">🧠 Summarize Page</button>
-</div>
-
+  <!-- 🔄 Refresh Help -->
   <div class="card">
     <div class="column">
       <h1>Refresh</h1>
@@ -241,9 +96,9 @@ button.mini:hover {
     </div>
   </div>
 
-  <!-- footer -->
+  <!-- 👣 Footer -->
   <div class="credits">
-    v0.3 · Made with ✨Procrastination✨ <br> by Sam van Remortel
+    v0.3 · Made with ✨Procrastination✨<br>by Sam van Remortel
   </div>
 
   <script src="popup.js"></script>

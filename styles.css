@@ -1,57 +1,58 @@
-/* clickable words: dotted underline + pointer */
+/* ───────── CLICKABLE WORDS ───────── */
+/* Dotted underline and pointer cursor */
 .df-word {
   border-bottom: 1px dotted #2563eb;
   cursor: pointer;
+  display: inline-block; /* Prevent layout shift by containing tooltip */
   position: relative;
-  display: inline-block; /* prevent layout shift by making it contain absolutely positioned tooltip */
 }
 
-/* tooltip container (absolutely positioned, does NOT affect layout) */
+/* ───────── TOOLTIP STYLING ───────── */
+/* Hidden by default */
 .df-tooltip-text {
-  visibility: hidden;
-  opacity: 0;
-  transition: opacity 0.2s ease;
   background: #1f2937;
-  color: #fff;
-  padding: 10px 12px 8px 8px;
   border-radius: 6px;
+  color: #fff;
+  display: block;
+  font-size: 0.85rem;
+  left: 0;
+  line-height: 1.3;
+  max-width: 250px;
+  opacity: 0;
+  padding: 10px 12px 8px 8px;
   position: absolute;
   bottom: 125%;
-  left: 0;
-  max-width: 250px;
-  font-size: 0.85rem;
-  line-height: 1.3;
+  transition: opacity 0.2s ease;
+  visibility: hidden;
   white-space: normal;
   z-index: 9999;
-
-  display: block;
 }
 
-/* show tooltip when active */
+/* Visible when .df-show is active */
 .df-word.df-show .df-tooltip-text {
-  visibility: visible;
   opacity: 1;
+  visibility: visible;
 }
 
-/* close (×) button styling */
+/* ───────── TOOLTIP CLOSE BUTTON ───────── */
 .df-tooltip-close {
-  position: absolute;
-  top: 4px;
-  right: 6px;
   background: none;
   border: none;
   color: #fff;
-  font-size: 1rem;
   cursor: pointer;
-  padding: 0;
+  font-size: 1rem;
   line-height: 1;
+  padding: 0;
+  position: absolute;
+  right: 6px;
+  top: 4px;
 }
 
-/* optional: hover effect */
 .df-tooltip-close:hover {
   color: #f87171;
 }
 
+/* ───────── TOOLTIP CONTENT AREA ───────── */
 .df-tooltip-content {
   display: block;
   padding-top: 8px;

@@ -3,34 +3,40 @@
   "name": "Dyslexia NLP Helper (MVP)",
   "version": "0.3",
   "description": "Highlights difficult words and shows context-aware explanations.",
+
   "permissions": [
     "activeTab",
-    "storage",
-    "contextMenus"            
+    "contextMenus",
+    "storage"
   ],
-  "background": {
-  "service_worker": "background.js"
-},
-  "action": {            
-    "default_popup": "popup.html",
-    "default_title": "Dyslexia NLP Helper"
-  },
+
   "host_permissions": [
-  "https://api.openai.com/*"
-],
+    "https://api.openai.com/*"
+  ],
+
+  "background": {
+    "service_worker": "background.js"
+  },
+
+  "action": {
+    "default_title": "Dyslexia NLP Helper",
+    "default_popup": "popup.html"
+  },
+
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
+      "run_at": "document_idle",
       "js": [
-        "secret.js",          
+        "secret.js",
         "common-words.js",
         "content.js",
         "math.js"
       ],
-      "css": ["styles.css"],
-      "run_at": "document_idle"
+      "css": ["styles.css"]
     }
   ],
+
   "web_accessible_resources": [
     {
       "resources": [
