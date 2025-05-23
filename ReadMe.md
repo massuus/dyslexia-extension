@@ -1,71 +1,82 @@
 # Dyslexia-NLP Helper (MVP)
 
-Chrome-/Edge-compatible extension that makes any web page easier to read for
-people with dyslexia or low literacy by **explaining difficult words in-place
-with AI and letting the reader tune colours & typography**.
+A Chrome/Edge-compatible extension that makes any webpage easier to read for
+people with dyslexia or low literacy by **explaining difficult words in-place**
+and allowing users to **customize colours and typography**.
 
 Built by **Sam van Remortel**.
 
 ---
 
-## ✨ Current feature set
+## ✨ Feature Overview
 
-| Category | What it does |
-|----------|--------------|
-| **Lexical help** | • Click an underlined word → get a ≤ 15-word, context-aware explanation.<br>• Explanations are generated with OpenAI GPT-4.1-nano.<br>• `IndexedDB` + in-memory cache avoid repeat calls per *word × sentence*. |
-| **Visual comfort** | • **Pastel overlay** palette softens page glare.<br>• **Font switcher**: Default / OpenDyslexic / Lexend Deca.<br>• Live sliders for letter-spacing, word-spacing and line-height. |
-| **Controls** | • Toolbar popup with an **on/off master switch**.<br>• All settings are saved in `chrome.storage.sync` and follow you across tabs and devices. |
-| **Performance** | • Text wrapping runs only when enabled.<br>• Definitions are fetched once, cached forever (unless you clear site data). |
+| Category          | Features |
+|------------------|----------|
+| **Lexical Help** | • Click underlined words to get ≤ 15-word, context-aware definitions.<br>• Powered by OpenAI `gpt-4.1-nano`.<br>• Uses `IndexedDB` + in-memory cache to avoid duplicate API calls per *word × sentence*. |
+| **Visual Comfort** | • Pastel overlay palette to reduce screen glare.<br>• Font options: Default, OpenDyslexic, Lexend Deca.<br>• Sliders for letter spacing, word spacing, and line height. |
+| **Controls** | • Toolbar popup with on/off master switch.<br>• All preferences saved using `chrome.storage.sync` (they persist across tabs and devices). |
+| **Performance** | • Only wraps text when enabled.<br>• Definitions are fetched once and cached persistently (unless you clear site data). |
+| **Bionic Reading** | • Option to bold the first part of each word for improved readability. |
+| **AI Page Tools** | • Ask questions about the page using embeddings.<br>• Summarize the page.<br>• Force pre-embedding for future queries. |
 
 ---
 
-## 📦 Installation (developer build)
+## 📦 Installation (Developer Mode)
 
-1. Clone or download this repo.
-2. **Add your OpenAI key**  
-   ```shell
+1. **Clone or download** this repository.
+2. **Add your OpenAI API key:**
+   ```bash
    cp secret.example.js secret.js
-   # then paste your key inside secret.js:
+   # Edit secret.js and paste your key:
    # const OPENAI_KEY = "sk-XXXXXXXXXXXXXXXXXXXXXXXX";
+````
 
-3. Visit `chrome://extensions` (or `edge://extensions`) → enable **Developer Mode** →
-   press **“Load unpacked”** and select the project folder.
+3. Open `chrome://extensions` (or `edge://extensions`).
+4. Enable **Developer Mode**.
+5. Click **"Load unpacked"** and select the project folder.
 
-> **Heads-up:** the model used (`gpt-4.1-nano`) is small and cheap but still
-> costs money. Set a spending cap in your OpenAI dashboard.
-
----
-
-## 🧑‍🏫 How to use
-
-1. Browse any normal website (HTTP/S).
-2. Underlined words mark potential stumbling blocks.
-3. Click a word → tooltip pops up with an explanation.
-4. Open the extension’s popup to:
-
-   * toggle the helper on/off
-   * pick a background tint
-   * change font or spacing
-5. All choices stick until you change them.
+> ⚠️ *The model used (`gpt-4.1-nano`) is inexpensive, but usage still incurs costs.*
+> Set a spending limit in your [OpenAI dashboard](https://platform.openai.com/account/billing/limits) to avoid surprises.
 
 ---
 
-## 🔧 Developer notes
+## 🧑‍🏫 How to Use
 
-* **No keys in source:** `secret.js` is git-ignored.
-* **Fonts:** `OpenDyslexic-Regular.woff2` and `LexendDeca-VariableFont.woff2`
-  are shipped inside `/assets/fonts` and referenced with `chrome.runtime.getURL`.
-* **Manifest v3** — background-less; everything runs in the content script.
+1. Navigate to any standard webpage.
+2. Underlined words indicate potential comprehension challenges.
+3. Click a word to view a short AI-generated explanation.
+4. Use the extension popup to:
+
+   * Toggle the helper on/off
+   * Choose an overlay tint
+   * Switch fonts or adjust spacing
+5. All settings are saved until manually changed.
+
+---
+
+## 🔧 Developer Notes
+
+* `secret.js` is `.gitignore`d — no keys are exposed.
+* Fonts (`OpenDyslexic` and `Lexend Deca`) are embedded and loaded locally via `chrome.runtime.getURL`.
+* Manifest V3 is used with a **background-less design** — all logic runs in content scripts.
 * **Caching layers:**
 
-  1. **Map** in the current tab (fastest)
-  2. **IndexedDB** (`defs` store, compound key `[word, sentence]`)
-  3. **OpenAI** API call (last resort)
+  1. In-memory `Map` (fastest, per session)
+  2. Persistent `IndexedDB` (per word × sentence)
+  3. OpenAI API (only as fallback)
 
 ---
 
-## Planned ideas:
+## 🔮 Planned Features
 
-- Add tint intensety slider
-- Ask questions about the page
+* [ ] Tint intensity slider
+
+---
+
+## 🙏 Credits
+
+Made with ✨procrastination✨ by Sam van Remortel
+Typeface: [OpenDyslexic](https://opendyslexic.org/), [Lexend](https://www.lexend.com/)
+API: [OpenAI](https://platform.openai.com/)
+
 
