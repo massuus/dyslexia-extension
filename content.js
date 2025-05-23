@@ -219,7 +219,7 @@ document.addEventListener("click", async (event) => {
 });
 
 /* ---------------- TOGGLE SUPPORT ------------------- */
-let explainerEnabled = false;
+let explainerEnabled = false; 
 let liveObserver     = null;
 let unwrapCleanup    = null;
 
@@ -234,12 +234,33 @@ chrome.runtime.onMessage.addListener((msg) => {
   else if (!msg.enabled && explainerEnabled) { explainerEnabled = false; disableExplainer(); }
 });
 
+/* wrap existing <span class="br-word"> if difficult */
+function addDfToBrWords(root){
+  if (!(root instanceof Element)) return;  // 👈 safeguard added
+  root.querySelectorAll("span.br-word").forEach(br => {
+    if (br.closest(".df-word")) return;
+    const txt = br.textContent;
+    if (!isDifficult(txt)) return;
+
+    const df = document.createElement("span");
+    df.className = "df-word";
+    df.dataset.word = txt;
+    df.dataset.sent = encodeURIComponent(txt);
+    br.replaceWith(df);
+    df.appendChild(br);
+  });
+}
+
 function enableExplainer() {
   walkAndWrap(document.body);
+  addDfToBrWords(document.body); 
 
   liveObserver = new MutationObserver((mutations) => {
     for (const m of mutations) for (const n of m.addedNodes) {
-      if (n.nodeType === Node.ELEMENT_NODE) walkAndWrap(n);
+      if (n.nodeType === Node.ELEMENT_NODE) {
+        walkAndWrap(n);
+        addDfToBrWords(n);  
+      }
     }
   });
   liveObserver.observe(document.body, { childList: true, subtree: true });
@@ -345,3 +366,102 @@ chrome.runtime.onMessage.addListener((m) => {
   }
 });
 /* ╚══════════════════════════════════╝ */
+
+/* ╔════════  BIONIC READING  ════════╗ */
+const BR_ID = "df-br-style";
+let brOn=false, io=null, mo=null;
+
+/* helpers */
+function addCss(){
+  if(document.getElementById(BR_ID)) return;
+  const s=document.createElement("style");
+  s.id=BR_ID;
+  s.textContent=".br-word b{font-weight:700}";
+  document.head.appendChild(s);
+}
+function rmCss(){document.getElementById(BR_ID)?.remove();}
+function fixLen(w){const n=w.length;return n<=3?1:n<=6?2:n<=9?3:4;}
+
+/* convert ONE element (p/li/h*) */
+/* convert ONE block in-place ----------------------------------- */
+function convertBlock(el){
+  if (el.dataset.brDone) return;          // already processed
+  el.dataset.brDone = "y";
+
+  const tw = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, {
+    acceptNode(n){
+      if (!n.nodeValue.trim()) return 2;
+      if (n.parentNode.closest(".br-word")) return 2;   // already bolded
+      if (/^(SCRIPT|STYLE|NOSCRIPT|CODE|PRE|TEXTAREA)$/i.test(n.parentNode.tagName)) return 2;
+      return 1;
+    }
+  });
+
+  const txtNodes = [];
+  for (let n; (n = tw.nextNode());) txtNodes.push(n);
+
+  txtNodes.forEach(txt => {
+    const parts = txt.nodeValue.split(/(\s+)/);
+    if (parts.length < 2) return;
+
+    const frag = document.createDocumentFragment();
+    parts.forEach(w => {
+      if (/^\s+$/.test(w)){ frag.appendChild(document.createTextNode(w)); return; }
+
+      /* build the bolded word */
+      const span = document.createElement("span");
+      span.className = "br-word";
+      const k = fixLen(w);
+      span.innerHTML = `<b>${w.slice(0, k)}</b>${w.slice(k)}`;
+
+      /* add dotted underline only if explainer is ON */
+      if (explainerEnabled && isDifficult(w)) {
+        const df = document.createElement("span");
+        df.className   = "df-word";
+        df.dataset.word = w;
+        df.dataset.sent = encodeURIComponent(w);
+        df.appendChild(span);
+        frag.appendChild(df);
+      } else {
+        frag.appendChild(span);
+      }
+    });
+    txt.parentNode.replaceChild(frag, txt);
+  });
+}
+
+/* enable / disable */
+function enableBR(){
+  if(brOn) return;
+  addCss();
+
+  io=new IntersectionObserver(es=>{
+    es.forEach(e=>{
+      if(e.isIntersecting){convertBlock(e.target);io.unobserve(e.target);}
+    });
+  },{rootMargin:"500px"});
+
+  document.querySelectorAll("p,li,h1,h2,h3,h4,h5,h6")
+          .forEach(el=>io.observe(el));
+
+  mo=new MutationObserver(ms=>{
+    for(const m of ms)for(const n of m.addedNodes)
+      if(n.nodeType===1 && /^(P|LI|H[1-6])$/.test(n.tagName)) io.observe(n);
+  });
+  mo.observe(document.body,{childList:true,subtree:true});
+  brOn=true;
+}
+function disableBR(){
+  if(!brOn) return;
+  io?.disconnect(); mo?.disconnect(); rmCss();
+  document.querySelectorAll(".br-word").forEach(el=>el.replaceWith(el.textContent));
+  brOn=false;
+}
+
+/* boot + messages */
+chrome.storage.sync.get({bionic:false},v=>v.bionic&&enableBR());
+chrome.runtime.onMessage.addListener(msg=>{
+  if(msg.type==="toggleBionic") msg.enabled?enableBR():disableBR();
+});
+/* ╚══════════════════════════════════╝ */
+

@@ -62,3 +62,9 @@ Built by **Sam van Remortel**.
   2. **IndexedDB** (`defs` store, compound key `[word, sentence]`)
   3. **OpenAI** API call (last resort)
 
+---
+
+## Planned ideas:
+
+- Add "bionic reading"
+

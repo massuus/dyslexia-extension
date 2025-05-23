@@ -23,6 +23,15 @@
       }
     }
 
+    .visually-hidden {
+      position: absolute;
+      left: -9999px;
+      top: auto;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+    }
+
     html,body{margin:0;padding:0;background:var(--c-bg)}
     body{
       font:14px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
@@ -112,7 +121,7 @@
 
     <div id="swatch-wrap"><!-- injected by popup.js --></div>
   </div>
-
+      <label for="fontSelect" class="visually-hidden">Font selection</label>
   <!-- 3️⃣  Typography panel -->
   <div class="card column">
     <div class="row">
@@ -121,7 +130,8 @@
         <span class="explanation-text">Font & spacing</span>
       </div>
 
-      <select id="fontSelect">
+      <label for="fontSelect" class="visually-hidden">Font selection</label>
+      <select id="fontSelect" title="Font selection">
         <option value="inherit">Default</option>
         <option value="'OpenDyslexic',sans-serif">OpenDyslexic</option>
         <option value="'LexendDeca',sans-serif">Lexend Deca</option>
@@ -142,6 +152,19 @@
 
     <button id="resetTypo" class="mini">Reset</button>
   </div>
+
+  <!-- Bionic Reading -->
+<div class="card">
+  <div class="column">
+    <h1>Bionic Reading</h1>
+    <span class="soften-glare-text">Bold first half of every word</span>
+  </div>
+
+  <label class="switch">
+    <input id="brToggle" type="checkbox">
+    <span class="slider"></span>
+  </label>
+</div>
 
   <div class="card">
     <div class="column">
