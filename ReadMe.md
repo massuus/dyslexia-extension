@@ -30,7 +30,7 @@ Built by **Sam van Remortel**.
    cp secret.example.js secret.js
    # Edit secret.js and paste your key:
    # const OPENAI_KEY = "sk-XXXXXXXXXXXXXXXXXXXXXXXX";
-````
+   ````
 
 3. Open `chrome://extensions` (or `edge://extensions`).
 4. Enable **Developer Mode**.
