@@ -23,27 +23,35 @@
     "default_popup": "popup.html"
   },
 
-  "content_scripts": [
-    {
-      "matches": ["<all_urls>"],
-      "run_at": "document_idle",
-      "js": [
-        "secret.js",
-        "common-words.js",
-        "content.js",
-        "math.js"
-      ],
-      "css": ["styles.css"]
-    }
-  ],
+"content_scripts": [
+  {
+    "matches": ["<all_urls>"],
+    "run_at": "document_idle",
+    "js": [
+      "secret.js",
+      "common-words.js",
+      "content/api.js",
+      "content/cache.js",
+      "content/explain.js",
+      "content/overlay.js",
+      "content/typography.js",
+      "content/bionic.js",
+      "content/embed.js",
+      "content/main.js",
+      "content/qa-widget.js",
+      "math.js"
+    ],
+    "css": ["styles.css"]
+  }
+],
 
-  "web_accessible_resources": [
-    {
-      "resources": [
-        "assets/fonts/OpenDyslexic-Regular.woff2",
-        "assets/fonts/LexendDeca-VariableFont.woff2"
-      ],
-      "matches": ["<all_urls>"]
-    }
-  ]
+"web_accessible_resources": [
+  {
+    "resources": [
+      "assets/fonts/OpenDyslexic-Regular.woff2",
+      "assets/fonts/LexendDeca-VariableFont.woff2"
+    ],
+    "matches": ["<all_urls>"]
+  }
+]
 }
