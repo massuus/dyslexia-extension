@@ -454,26 +454,45 @@ function convertBlock(el){
 }
 
 /* enable / disable */
-function enableBR(){
-  if(brOn) return;
+function enableBR() {
+  if (brOn) return;
   addCss();
 
-  io=new IntersectionObserver(es=>{
-    es.forEach(e=>{
-      if(e.isIntersecting){convertBlock(e.target);io.unobserve(e.target);}
+  io = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        convertBlock(entry.target);
+        io.unobserve(entry.target);
+      }
     });
-  },{rootMargin:"500px"});
+  }, { rootMargin: "500px" });
 
-  document.querySelectorAll("p,li,h1,h2,h3,h4,h5,h6")
-          .forEach(el=>io.observe(el));
+  // Defer element registration using idle callback
+  const candidates = document.querySelectorAll("p,li,h1,h2,h3,h4,h5,h6");
+  let i = 0;
 
-  mo=new MutationObserver(ms=>{
-    for(const m of ms)for(const n of m.addedNodes)
-      if(n.nodeType===1 && /^(P|LI|H[1-6])$/.test(n.tagName)) io.observe(n);
+  function registerBatch(deadline) {
+    while (i < candidates.length && deadline.timeRemaining() > 5) {
+      io.observe(candidates[i++]);
+    }
+    if (i < candidates.length) {
+      requestIdleCallback(registerBatch);
+    }
+  }
+
+  requestIdleCallback(registerBatch);
+
+  mo = new MutationObserver(mutations => {
+    for (const m of mutations)
+      for (const n of m.addedNodes)
+        if (n.nodeType === 1 && /^(P|LI|H[1-6])$/.test(n.tagName))
+          io.observe(n);
   });
-  mo.observe(document.body,{childList:true,subtree:true});
-  brOn=true;
+
+  mo.observe(document.body, { childList: true, subtree: true });
+  brOn = true;
 }
+
 function disableBR(){
   if(!brOn) return;
   io?.disconnect(); mo?.disconnect(); rmCss();
