@@ -111,5 +111,62 @@ document.getElementById("askBtn")?.addEventListener("click", () => {
 document.getElementById("summarizeBtn")?.addEventListener("click", () => {
   sendToTab({ type: "askPagePrompt", prefill: "Summarize this page" });
 });
+
+let overlayColor = null;
+
+const intensityEl = document.getElementById("tintIntensity");
+
+function updateOverlay(color, intensity) {
+  chrome.storage.sync.set({ overlayColor: color, overlayIntensity: intensity });
+  sendToTab({ type: "setOverlay", color, intensity });
+  draw(); // use the global overlayColor
+}
+
+function draw() {
+  wrap.innerHTML = "";
+  COLORS.forEach(c => {
+    const d = document.createElement("div");
+    d.className = "swatch";
+    d.style.background = c;
+    d.dataset.active = c === overlayColor;
+    d.onclick = () => {
+      overlayColor = c === "#ffffff" ? null : c;
+      const intensity = +intensityEl.value;
+      updateOverlay(overlayColor, intensity);
+    };
+    wrap.appendChild(d);
+  });
+}
+
+
+chrome.storage.sync.get({ overlayColor: null, overlayIntensity: 22 }, v => {
+  overlayColor = v.overlayColor ?? "#ffffff";
+  intensityEl.value = v.overlayIntensity ?? 22;
+  draw();
+});
+
+
+// intensity change
+const debouncedUpdateOverlay = debounce((color, intensity) => {
+  updateOverlay(color, intensity);
+}, 300);
+
+intensityEl.addEventListener("input", () => {
+  const intensity = +intensityEl.value;
+  debouncedUpdateOverlay(overlayColor, intensity);
+});
+
+
+function debounce(func, delay) {
+  let timeout;
+  return (...args) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), delay);
+  };
+}
+
+
+
 })();
+
 

@@ -87,8 +87,42 @@
     /* ───── typography sliders ───── */
     .card label{font-size:12px;display:flex;justify-content:space-between}
     .card input[type=range]{width:120px}
-    select{padding:4px 6px;border:1px solid var(--c-border);border-radius:6px}
-    button.mini{align-self:flex-start;font-size:11px;padding:4px 8px}
+    select {
+  padding: 6px 10px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius);
+  background-color: var(--c-card);
+  color: var(--c-text);
+  font-size: 13px;
+  font-weight: 500;
+  transition: border 0.2s, background 0.2s;
+  appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg fill='%23111827' height='16' viewBox='0 0 24 24' width='16' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 12px;
+  padding-right: 28px;
+}
+
+    button.mini {
+  margin-top: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 12px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius);
+  background: var(--c-bg);
+  color: var(--c-text);
+  cursor: pointer;
+  transition: background 0.2s, border 0.2s;
+}
+
+button.mini:hover {
+  background: var(--c-accent);
+  color: white;
+  border-color: var(--c-accent);
+}
+
 
     /* ───── misc ───── */
     .explanation-text,.soften-glare-text{font-size:12px;opacity:.75}
@@ -133,16 +167,21 @@
     </label>
   </div>
 
-  <!-- 2️⃣  Pastel overlay picker -->
-  <div class="card">
+<!-- 2️⃣  Pastel overlay picker -->
+<div class="card column">
+  <div class="row">
     <div class="column">
       <h1 class="overlay-title">Overlay</h1>
       <div class="soften-glare-text">Soften background glare</div>
     </div>
-
-    <div id="swatch-wrap"><!-- injected by popup.js --></div>
   </div>
-      <label for="fontSelect" class="visually-hidden">Font selection</label>
+
+  <div id="swatch-wrap"><!-- injected by popup.js --></div>
+
+  <label for="tintIntensity">Intensity</label>
+  <input type="range" id="tintIntensity" min="0" max="100" step="1" value="22">
+</div>
+
   <!-- 3️⃣  Typography panel -->
   <div class="card column">
     <div class="row">
@@ -153,7 +192,7 @@
 
       <label for="fontSelect" class="visually-hidden">Font selection</label>
       <select id="fontSelect" title="Font selection">
-        <option value="inherit">Default</option>
+        <option value="inherit">Website font</option>
         <option value="'OpenDyslexic',sans-serif">OpenDyslexic</option>
         <option value="'LexendDeca',sans-serif">Lexend Deca</option>
       </select>
@@ -204,7 +243,7 @@
 
   <!-- footer -->
   <div class="credits">
-    v0.2 · Made with ✨Procrastination✨ <br> by Sam van Remortel
+    v0.3 · Made with ✨Procrastination✨ <br> by Sam van Remortel
   </div>
 
   <script src="popup.js"></script>

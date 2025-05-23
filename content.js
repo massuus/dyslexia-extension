@@ -287,38 +287,52 @@ function disableExplainer() {
 /* ╔════════  PASTEL OVERLAY  ════════╗ */
 const OVERLAY_ID = "df-overlay";
 
-function applyOverlay(color) {
-  removeOverlay();
-  if (!color) return;
+function applyOverlay(color, intensity = 22) {
+  const existing = document.getElementById(OVERLAY_ID);
 
-  const div   = document.createElement("div");
-  div.id      = OVERLAY_ID;
+  if (!color) {
+    removeOverlay();
+    return;
+  }
+
+  const opacity = (intensity / 100).toFixed(2);
+
+  if (existing) {
+    existing.style.background = color;
+    existing.style.opacity = opacity;
+    return;
+  }
+
+  const div = document.createElement("div");
+  div.id = OVERLAY_ID;
   div.style.cssText = `
     position:fixed;inset:0;pointer-events:none;
     background:${color};
     mix-blend-mode:multiply;
-    opacity:.22;               /* tweak strength here */
-    z-index:2147483647;        /* sit above everything */
+    opacity:${opacity};
+    z-index:2147483647;
   `;
   document.documentElement.appendChild(div);
 }
+
+
 
 function removeOverlay() {
   document.getElementById(OVERLAY_ID)?.remove();
 }
 
 /* ①  boot – apply stored tint */
-chrome.storage.sync.get({ overlayColor: null }, ({ overlayColor }) => {
-  applyOverlay(overlayColor);
+chrome.storage.sync.get({ overlayColor: null, overlayIntensity: 22 }, ({ overlayColor, overlayIntensity }) => {
+  applyOverlay(overlayColor, overlayIntensity);
 });
 
-/* ②  react to popup */
 chrome.runtime.onMessage.addListener((m) => {
   if (m.type === "setOverlay") {
-    chrome.storage.sync.set({ overlayColor: m.color });   // persist
-    applyOverlay(m.color);
+    chrome.storage.sync.set({ overlayColor: m.color, overlayIntensity: m.intensity });
+    applyOverlay(m.color, m.intensity);
   }
 });
+
 /* ╚══════════════════════════════════╝ */
 
 /* ╔════════  TYPOGRAPHY CONTROL  ════════╗ */
@@ -326,36 +340,40 @@ const TYPO_ID = "df-typo-style";
 const DEFAULT_TYPO = { font:"inherit", ls:0, ws:0, lh:"normal" };
 
 function applyTypography({ font, ls, ws, lh } = DEFAULT_TYPO) {
-  // remove old block
   document.getElementById(TYPO_ID)?.remove();
-
-  const css = `
-    @font-face{
-      font-family:"OpenDyslexic";
-      src:url(${chrome.runtime.getURL("assets/fonts/OpenDyslexic-Regular.woff2")}) format("woff2");
-      font-display:swap;
-    }
-    @font-face{
-      font-family:"LexendDeca";
-      src:url(${chrome.runtime.getURL("assets/fonts/LexendDeca-VariableFont.woff2")}) format("woff2");
-      font-display:swap;
-    }
-
-    :root{
-      --df-font:${font};
-      --df-ls:${ls}px;
-      --df-ws:${ws}px;
-      --df-lh:${lh};
-    }
-    html,body,input,textarea,select{
-      font-family:var(--df-font)!important;
-      letter-spacing:var(--df-ls)!important;
-      word-spacing:var(--df-ws)!important;
-      line-height:var(--df-lh)!important;
-    }`;
-
   const tag = document.createElement("style");
   tag.id = TYPO_ID;
+
+  let css = "";
+
+  // ✅ Only define font-family if custom font is selected
+  if (font !== "inherit") {
+    css += `
+      @font-face {
+        font-family: "OpenDyslexic";
+        src: url(${chrome.runtime.getURL("assets/fonts/OpenDyslexic-Regular.woff2")}) format("woff2");
+        font-display: swap;
+      }
+      @font-face {
+        font-family: "LexendDeca";
+        src: url(${chrome.runtime.getURL("assets/fonts/LexendDeca-VariableFont.woff2")}) format("woff2");
+        font-display: swap;
+      }
+
+      html, body, input, textarea, select {
+        font-family: ${font} !important;
+      }
+    `;
+  }
+
+  css += `
+    html, body, input, textarea, select {
+      letter-spacing: ${ls}px !important;
+      word-spacing: ${ws}px !important;
+      line-height: ${lh} !important;
+    }
+  `;
+
   tag.textContent = css;
   document.head.appendChild(tag);
 }
