@@ -1,3 +1,4 @@
+// This is the popup script for the Chrome extension. It handles the popup UI and user interactions.
 (() => {
 /* ---------- safe dispatcher (popup.js) ---------- */
 function sendToTab(msg){
@@ -97,4 +98,18 @@ br?.addEventListener("change",()=>{const en=br.checked;
 chrome.tabs.query({active:true,currentWindow:true},([tab])=>{
   if(tab && !/^https?:\/\//.test(tab.url)) document.body.classList.add("blocked");
 });
+
+/* ---------- AI buttons ---------- */
+document.getElementById("embedBtn")?.addEventListener("click", () => {
+  sendToTab({ type: "forceEmbed" });
+});
+
+document.getElementById("askBtn")?.addEventListener("click", () => {
+  sendToTab({ type: "askPagePrompt" });
+});
+
+document.getElementById("summarizeBtn")?.addEventListener("click", () => {
+  sendToTab({ type: "askPagePrompt", prefill: "Summarize this page" });
+});
 })();
+

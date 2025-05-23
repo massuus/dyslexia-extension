@@ -95,6 +95,27 @@
     .credits{text-align:center;font-size:11px;opacity:.6}
     .credits a{color:inherit}
     body.blocked .card{opacity:.4;pointer-events:none}
+
+    .popup-btn {
+  width: 100%;
+  padding: 10px 12px;
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--c-text);
+  background: var(--c-bg);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background 0.2s, border 0.2s;
+}
+
+.popup-btn:hover {
+  background: var(--c-accent);
+  color: white;
+  border-color: var(--c-accent);
+}
+
   </style>
 </head>
 <body>
@@ -164,6 +185,14 @@
     <input id="brToggle" type="checkbox">
     <span class="slider"></span>
   </label>
+</div>
+
+<div class="card column">
+  <h1>AI Page Tools</h1>
+
+  <button class="popup-btn" id="embedBtn">📌 Embed Page</button>
+  <button class="popup-btn" id="askBtn">💬 Ask AI</button>
+  <button class="popup-btn" id="summarizeBtn">🧠 Summarize Page</button>
 </div>
 
   <div class="card">

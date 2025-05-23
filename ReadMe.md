@@ -66,5 +66,6 @@ Built by **Sam van Remortel**.
 
 ## Planned ideas:
 
-- Add "bionic reading"
+- Add tint intensety slider
+- Ask questions about the page
 

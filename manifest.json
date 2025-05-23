@@ -5,8 +5,12 @@
   "description": "Highlights difficult words and shows context-aware explanations.",
   "permissions": [
     "activeTab",
-    "storage"            
+    "storage",
+    "contextMenus"            
   ],
+  "background": {
+  "service_worker": "background.js"
+},
   "action": {            
     "default_popup": "popup.html",
     "default_title": "Dyslexia NLP Helper"
@@ -14,14 +18,14 @@
   "host_permissions": [
   "https://api.openai.com/*"
 ],
-
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
       "js": [
         "secret.js",          
         "common-words.js",
-        "content.js"
+        "content.js",
+        "math.js"
       ],
       "css": ["styles.css"],
       "run_at": "document_idle"

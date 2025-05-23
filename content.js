@@ -1,3 +1,4 @@
+// This file is content.js
 /* ----------------- Dyslexia‑NLP: Click‑to‑Explain ----------------- */
 
 // CONFIG
@@ -16,7 +17,7 @@ const defs = new Map();
  * so look‑ups are O(1) and no manual encoding is needed.
  */
 const DB_NAME    = "dyslexia‑helper";
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 let   dbPromise  = null;
 
 function openDB() {
@@ -29,6 +30,10 @@ function openDB() {
       const db = req.result;
       if (!db.objectStoreNames.contains("defs")) {
         db.createObjectStore("defs", { keyPath: ["word", "sentence"] });
+      }
+      if (!db.objectStoreNames.contains("pageEmbeds")) {
+        const store = db.createObjectStore("pageEmbeds", { keyPath: ["url", "idx"] });
+        store.createIndex("byUrl", "url", { unique: false });
       }
     };
 
@@ -465,3 +470,257 @@ chrome.runtime.onMessage.addListener(msg=>{
 });
 /* ╚══════════════════════════════════╝ */
 
+const EMBED_MODEL = "text-embedding-3-small";
+
+function getCleanPageText() {
+  const clone = document.body.cloneNode(true);
+  clone.querySelectorAll("script,style,noscript,code,pre,svg,canvas").forEach(el => el.remove());
+  return clone.innerText.replace(/\s+/g, " ").trim();
+}
+
+function chunkText(str, maxTokens = 400) {
+  const sents = str.split(/(?<=[.?!])\s+/);
+  const chunks = [];
+  let buf = "";
+  for (const s of sents) {
+    if ((buf + s).split(" ").length > maxTokens) {
+      chunks.push(buf.trim());
+      buf = s + " ";
+    } else buf += s + " ";
+  }
+  if (buf.trim()) chunks.push(buf.trim());
+  return chunks;
+}
+
+async function embedBatch(texts) {
+  const res = await fetch("https://api.openai.com/v1/embeddings", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${OPENAI_KEY}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ model: EMBED_MODEL, input: texts })
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return (await res.json()).data.map(d => d.embedding);
+}
+
+async function storeEmbeds(url, chunks, vectors) {
+  const db = await openDB();
+  const tx = db.transaction("pageEmbeds", "readwrite");
+  const st = tx.objectStore("pageEmbeds");
+  chunks.forEach((txt, i) => st.put({ url, idx: i, text: txt, vec: vectors[i] }));
+  return tx.complete;
+}
+
+async function ensurePageEmbedded() {
+  const url = location.href;
+  const db = await openDB();
+  const exists = await new Promise(res => {
+    const tx = db.transaction("pageEmbeds");
+    const ix = tx.objectStore("pageEmbeds").index("byUrl");
+    const req = ix.getKey(IDBKeyRange.only(url));
+    req.onsuccess = () => res(req.result !== undefined);
+  });
+  if (exists) return;
+  const text = getCleanPageText();
+  const chunks = chunkText(text);
+  const vecs = await embedBatch(chunks);
+  await storeEmbeds(url, chunks, vecs);
+}
+
+async function answerQuestion(question) {
+  const url = location.href;
+  const db = await openDB();
+  const vecQ = (await embedBatch([question]))[0];
+
+  const all = await new Promise(res => {
+    const tx = db.transaction("pageEmbeds");
+    const ix = tx.objectStore("pageEmbeds").index("byUrl");
+    const req = ix.getAll(IDBKeyRange.only(url));
+    req.onsuccess = () => res(req.result);
+  });
+
+  if (!all.length) return "Deze pagina is nog niet ge-embed. Ververs eerst.";
+
+  all.forEach(o => o.score = cosineSim(vecQ, o.vec));
+  const top = [...all].sort((a, b) => b.score - a.score).slice(0, 4);
+
+  const context = top.map(o => o.text).join("\n\n---\n\n");
+  const sys = "Je bent een AI die alleen antwoord geeft op basis van de gegeven context.";
+  const prompt = `Context:\n${context}\n\nVraag: ${question}`;
+
+  const res = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${OPENAI_KEY}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      model: "gpt-4o",
+      messages: [{ role: "system", content: sys }, { role: "user", content: prompt }],
+      temperature: 0.2
+    })
+  });
+
+  const data = await res.json();
+  return data.choices?.[0]?.message?.content?.trim() || "Geen antwoord ontvangen.";
+}
+chrome.runtime.onMessage.addListener(async (msg) => {
+  if (msg.type === "askPagePrompt") {
+    createQAWidget();
+    if (msg.prefill) {
+      await ensurePageEmbedded();
+      const output = document.getElementById("df-qa-output");
+      const box = document.querySelector(".df-qa-question");
+      box.value = msg.prefill;
+      output.style.display = "block";
+      output.textContent = "Thinking...";
+      const answer = await answerQuestion(msg.prefill);
+      output.textContent = answer;
+    }
+  }
+
+  if (msg.type === "forceEmbed") {
+    await ensurePageEmbedded();
+    alert("Page embedded successfully.");
+  }
+});
+
+
+function createQAWidget() {
+  if (document.getElementById("df-qa-widget")) return;
+
+  const wrapper = document.createElement("div");
+  wrapper.id = "df-qa-widget";
+  wrapper.innerHTML = `
+    <style>
+      :root {
+        --c-bg:#f9fafb;
+        --c-card:#ffffff;
+        --c-text:#111827;
+        --c-accent:#2563eb;
+        --c-border:#e5e7eb;
+        --radius:14px;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --c-bg:#111827;
+          --c-card:#1f2937;
+          --c-text:#f3f4f6;
+          --c-border:#374151;
+        }
+      }
+
+      #df-qa-widget {
+        all: initial;
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 300px;
+        background: var(--c-card);
+        color: var(--c-text);
+        border: 1px solid var(--c-border);
+        border-radius: var(--radius);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        z-index: 2147483647;
+      }
+
+      .df-qa-card {
+        display: flex;
+        flex-direction: column;
+        padding: 18px 20px 22px;
+        gap: 12px;
+      }
+
+      .df-qa-card h1 {
+        font-size: 15px;
+        font-weight: 600;
+        margin: 0;
+        color: white;
+        background: var(--c-accent);
+        padding: 8px 12px;
+        border-radius: 8px;
+      }
+
+      .df-qa-question {
+        width: 100%;
+        resize: vertical;
+        padding: 8px;
+        border: 1px solid var(--c-border);
+        border-radius: 6px;
+        font-size: 13px;
+        box-sizing: border-box;
+        font-family: inherit;
+        background: var(--c-bg);
+        color: var(--c-text);
+      }
+
+      .df-qa-send {
+        background: var(--c-accent);
+        color: white;
+        font-weight: bold;
+        border: none;
+        border-radius: 8px;
+        padding: 8px;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+
+      .df-qa-send:hover {
+        background: #1e40af;
+      }
+
+      .df-qa-answer {
+        font-size: 13px;
+        background: var(--c-bg);
+        padding: 10px;
+        border-radius: 8px;
+        white-space: pre-wrap;
+        max-height: 180px;
+        overflow-y: auto;
+        border: 1px solid var(--c-border);
+      }
+
+      .df-qa-close {
+        position: absolute;
+        top: 4px;
+        right: 10px;
+        background: none;
+        border: none;
+        font-size: 18px;
+        color: var(--c-text);
+        cursor: pointer;
+        font-weight: bold;
+      }
+    </style>
+
+    <div class="df-qa-card">
+      <button class="df-qa-close" title="Close">&times;</button>
+      <h1>Ask a question about this page</h1>
+      <textarea class="df-qa-question" rows="3" placeholder="e.g. 'Summarize this page'"></textarea>
+      <button class="df-qa-send">Ask AI</button>
+      <div class="df-qa-answer" id="df-qa-output" style="display:none"></div>
+    </div>
+  `;
+
+  document.body.appendChild(wrapper);
+
+  const textarea = wrapper.querySelector(".df-qa-question");
+  const button = wrapper.querySelector(".df-qa-send");
+  const output = wrapper.querySelector(".df-qa-answer");
+  const close = wrapper.querySelector(".df-qa-close");
+
+  button.onclick = async () => {
+    const question = textarea.value.trim();
+    if (!question) return;
+    output.style.display = "block";
+    output.textContent = "Thinking...";
+    await ensurePageEmbedded();
+    const answer = await answerQuestion(question);
+    output.textContent = answer;
+  };
+
+  close.onclick = () => wrapper.remove();
+}
