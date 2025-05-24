@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Settings – Dyslexia Helper</title>
+  <link rel="stylesheet" href="popup/popup.css" />
+  <style>
+    .help-text {
+      font-size: 13px;
+      opacity: 0.8;
+      margin-top: 8px;
+    }
+    .api-key-controls {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card column">
+    <h1>🔑 OpenAI API Key</h1>
+    <label for="apiKeyInput" class="explanation-text">Enter your key to use AI features</label>
+    <input
+      id="apiKeyInput"
+      type="password"
+      placeholder="sk-..."
+      style="width: 100%; padding: 8px; font-size: 13px; border-radius: var(--radius); border: 1px solid var(--c-border);"
+    />
+    <div class="api-key-controls">
+      <button class="popup-btn" id="saveKeyBtn">💾 Save</button>
+      <button class="popup-btn" id="clearKeyBtn">❌ Clear</button>
+    </div>
+    <div id="status" class="explanation-text" style="margin-top: 6px;"></div>
+    <div class="help-text">
+      To use the AI features, you need an OpenAI API key.
+      <br>
+      You can get one from <a href="https://platform.openai.com/account/api-keys" rel="noopener" target="_blank">https://platform.openai.com/account/api-keys</a>.
+      <br><br>
+      Paste your key above. It will only be stored securely in your browser and never shared.
+    </div>
+  </div>
+
+  <div class="credits">
+    v0.3 · Made by Sam van Remortel · 
+    <a href="https://github.com/massuus/dyslexia-extension" rel="noopener" target="_blank">GitHub</a>
+  </div>
+
+  <script src="options.js"></script>
+
+</body>
+</html>

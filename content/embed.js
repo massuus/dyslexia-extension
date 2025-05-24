@@ -52,6 +52,9 @@ function cosineSim(a, b) {
 
 /* Answer a user question using nearest context from embeddings */
 window.answerQuestion = async function (question) {
+  const apiKey = await getOpenAIKey();
+  if (!apiKey) return "Missing API key. Please add it via the settings.";
+
   const url = location.href;
   const vecQ = (await embedBatch([question]))[0];
   const chunks = await getEmbeds(url);
@@ -71,7 +74,7 @@ If the answer is not clearly present or cannot be confidently inferred from the 
   const res = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: {
-      "Authorization": `Bearer ${OPENAI_KEY}`,
+      "Authorization": `Bearer ${apiKey}`,
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
@@ -87,4 +90,5 @@ If the answer is not clearly present or cannot be confidently inferred from the 
   const data = await res.json();
   return data.choices?.[0]?.message?.content?.trim() || "I could not find anything about that on this page.";
 };
+
 

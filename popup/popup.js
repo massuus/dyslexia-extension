@@ -137,6 +137,47 @@
     }
   });
 
+  /* ---------- Grey out AI buttons when no API key is set ---------- */
+  chrome.storage.sync.get("openaiApiKey", ({ openaiApiKey }) => {
+    const hasKey = Boolean(openaiApiKey);
+
+    // AI tools section
+    const aiButtons = ["embedBtn", "askBtn", "summarizeBtn"].map(id => document.getElementById(id));
+    const aiDisabledMsg = document.getElementById("aiDisabledMsg");
+
+    // Word explainer
+    const explainerCard = document.getElementById("explainerCard");
+    const explainerToggleWrap = document.getElementById("explainerToggleWrap");
+    const explainerMsg = document.getElementById("explainerDisabledMsg");
+
+    if (!hasKey) {
+      // Disable AI buttons
+      aiButtons.forEach(btn => {
+        btn.disabled = true;
+        btn.style.opacity = "0.5";
+        btn.style.cursor = "not-allowed";
+      });
+      aiDisabledMsg.style.display = "block";
+
+      // Hide explainer toggle and show help
+      if (explainerToggleWrap) explainerToggleWrap.style.display = "none";
+      explainerMsg.style.display = "block";
+
+      // ✅ Enable flex-wrap only when needed
+      explainerCard?.classList.add("wrap");
+
+      // Open settings links
+      document.getElementById("openOptionsLink")?.addEventListener("click", e => {
+        e.preventDefault();
+        chrome.runtime.openOptionsPage();
+      });
+      document.getElementById("openOptionsLink2")?.addEventListener("click", e => {
+        e.preventDefault();
+        chrome.runtime.openOptionsPage();
+      });
+    }
+  });
+
   /* ---------- AI Button Actions ---------- */
   document.getElementById("embedBtn")?.addEventListener("click", () => {
     sendToTab({ type: "forceEmbed" });
@@ -158,6 +199,13 @@
     });
   }
 
+  /* ---------- Options Button ---------- */
+  const optionsBtn = document.getElementById("optionsBtn");
+  if (optionsBtn) {
+    optionsBtn.addEventListener("click", () => {
+      chrome.runtime.openOptionsPage();
+    });
+  }
 
 
 

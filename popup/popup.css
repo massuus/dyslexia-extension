@@ -230,3 +230,16 @@ button.mini:hover {
   color: white;
   border-color: var(--c-accent);
 }
+
+.security-link{
+  color: #2563eb; 
+  text-decoration: none;
+}
+
+.wrap {
+  flex-wrap: wrap;
+}
+
+#optionsBtn:hover svg {
+  fill: var(--c-accent);
+}

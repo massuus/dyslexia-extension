@@ -8,18 +8,44 @@
 </head>
 <body>
 
+  <!-- Header -->
+<div style="display: flex;justify-content: space-between;">
+  <h1>Dyslexia Helper</h1>
+<button id="optionsBtn" title="Open settings" style="background: none; border: none; cursor: pointer; padding: 4px;">
+    <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" viewBox="0 0 24 24" fill="var(--c-text)">
+      <path d="M19.14,12.94c.04-.31.06-.63.06-.94s-.02-.63-.06-.94l2.03-1.58a.5.5,0,0,0,.12-.65l-1.92-3.32a.5.5,0,0,0-.61-.22l-2.39.96a7.028,7.028,0,0,0-1.63-.94L14.5,2.5A.5.5,0,0,0,14,2h-4a.5.5,0,0,0-.5.5l-.36,2.41a6.978,6.978,0,0,0-1.63.94l-2.39-.96a.5.5,0,0,0-.61.22L2.71,8.77a.5.5,0,0,0,.12.65L4.86,11c-.04.31-.06.63-.06.94s.02.63.06.94L2.83,14.46a.5.5,0,0,0-.12.65l1.92,3.32a.5.5,0,0,0,.61.22l2.39-.96a7.028,7.028,0,0,0,1.63.94L9.5,21.5a.5.5,0,0,0,.5.5h4a.5.5,0,0,0,.5-.5l.36-2.41a6.978,6.978,0,0,0,1.63-.94l2.39.96a.5.5,0,0,0,.61-.22l1.92-3.32a.5.5,0,0,0-.12-.65Zm-7.14,2.56a3.5,3.5,0,1,1,3.5-3.5A3.504,3.504,0,0,1,12,15.5Z"/>
+    </svg>
+  </button>
+</div>
+
+  <!-- 🤖 AI Tools -->
+<div class="card column" id="aiToolsCard">
+  <h1>AI Page Tools</h1>
+  <button class="popup-btn" id="askBtn">💬 Ask AI</button>
+  <button class="popup-btn" id="summarizeBtn">🧠 Summarize Page</button>
+  <button class="popup-btn" id="embedBtn">🔄️ Reanalyze Page</button>
+  <div id="aiDisabledMsg" class="explanation-text" style="margin-top: 8px; display: none;">
+    🔒 API key not set. <a href="#" id="openOptionsLink">Set it here</a>.
+  </div>
+</div>
+
   <!-- 🔠 Word-explanation toggle -->
-  <div class="card">
-    <div class="column">
-      <h1>Word explanations</h1>
-      <div class="explanation-text">Enable or disable word explanations</div>
-    </div>
+<div class="card row" id="explainerCard">
+  <div class="column">
+    <h1>Word explanations</h1>
+    <div class="explanation-text">Enable or disable word explanations</div>
+  </div>
+  <div id="explainerToggleWrap">
     <label class="switch" for="toggle">
       <input id="toggle" type="checkbox" title="Toggle word explanations" />
       <span class="slider"></span>
       <span class="visually-hidden">Toggle word explanations</span>
     </label>
   </div>
+  <div id="explainerDisabledMsg" class="explanation-text" style="display: none;">
+    🔒 API key not set. <a href="#" id="openOptionsLink2">Set it here</a>.
+  </div>
+</div>
 
   <!-- 🎨 Pastel overlay picker -->
   <div class="card column">
@@ -80,14 +106,6 @@
     </label>
   </div>
 
-  <!-- 🤖 AI Tools -->
-  <div class="card column">
-    <h1>AI Page Tools</h1>
-    <button class="popup-btn" id="embedBtn">📌 (Re)Embed Page</button>
-    <button class="popup-btn" id="askBtn">💬 Ask AI</button>
-    <button class="popup-btn" id="summarizeBtn">🧠 Summarize Page</button>
-  </div>
-
   <!-- 🔄 Refresh Help -->
   <div class="card">
     <div class="column">
@@ -101,7 +119,8 @@
     v0.3 · Made with ✨Procrastination✨<br>
     by Sam van Remortel
     <br>
-    <a href="../security.html" target="_blank" style="color: #2563eb; text-decoration: none;">
+    <br>
+    <a href="../security.html" target="_blank" class="security-link">
       🔐 Security & Privacy
     </a>
   </div>
