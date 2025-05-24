@@ -61,12 +61,12 @@ Built by **Sam van Remortel**.
 
 * `secret.js` is `.gitignore`d — no keys are exposed.
 * Fonts (`OpenDyslexic` and `Lexend Deca`) are embedded and loaded locally via `chrome.runtime.getURL`.
-* Uses **Manifest V3** with a background-less design — all logic runs in the content script.
+* Uses **Manifest V3** with a background-less design — all logic runs in the content scripts.
 * **Caching layers:**
 
   1. In-memory `Map` (fastest, per session)
   2. Persistent `IndexedDB` (per word × sentence)
-  3. OpenAI API (fallback only)
+  3. OpenAI API 
 
 ---
 
