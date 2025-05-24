@@ -11,11 +11,9 @@ Built by **Sam van Remortel**.
 | Category          | Features |
 |------------------|----------|
 | **Lexical Help** | • Click underlined words to get ≤ 15-word, context-aware definitions.<br>• Powered by OpenAI `gpt-4.1-nano`.<br>• Uses `IndexedDB` + in-memory cache to avoid duplicate API calls per *word × sentence*. |
-| **Visual Comfort** | • Pastel overlay palette to reduce screen glare.<br>• **Tint intensity slider** to adjust overlay strength.<br>• Font options: Default, OpenDyslexic, Lexend Deca.<br>• Sliders for letter spacing, word spacing, and line height. |
-| **Controls** | • Toolbar popup with master toggle and settings.<br>• Gear icon opens a full settings panel (`options.html`).<br>• All preferences saved using `chrome.storage.sync` across tabs/devices. |
-| **Performance** | • Only wraps text when enabled.<br>• Definitions are fetched once and cached persistently. |
-| **Bionic Reading** | • Option to bold the first part of each word for improved readability. |
 | **AI Page Tools** | • Ask questions about the page using local embeddings.<br>• Summarize the page.<br>• Force pre-embedding for faster future queries.<br>• ⚠️ Disabled if no OpenAI API key is provided. |
+| **Visual Comfort** | • Pastel overlay palette to reduce screen glare.<br>• **Tint intensity slider** to adjust overlay strength.<br>• Font options: Default, OpenDyslexic, Lexend Deca.<br>• Sliders for letter spacing, word spacing, and line height. |
+| **Bionic Reading** | • Option to bold the first part of each word for improved readability. |
 
 ---
 
@@ -76,7 +74,7 @@ Built by **Sam van Remortel**.
 
 ## 🙏 Credits
 
-Crafted with ✨focus and just a little procrastination✨  
+Crafted with ✨hyperfocus and procrastination✨  
 by **Sam van Remortel**
 
 * Typeface: [OpenDyslexic](https://opendyslexic.org/), [Lexend](https://www.lexend.com/)
