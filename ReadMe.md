@@ -78,7 +78,7 @@ Built by **Sam van Remortel**.
 
 ## 🙏 Credits
 
-Crafted with ✨focus and just a little procrastination✨
+Crafted with ✨hyperfocus and just a little procrastination✨
 by **Sam van Remortel**
 
 * Typeface: [OpenDyslexic](https://opendyslexic.org/), [Lexend](https://www.lexend.com/)
