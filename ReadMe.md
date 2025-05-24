@@ -10,7 +10,7 @@ Built by **Sam van Remortel**.
 
 | Category          | Features |
 |------------------|----------|
-| **Lexical Help** | • Click underlined words to get ≤ 15-word, context-aware definitions.<br>• Powered by OpenAI `gpt-4.1-nano`.<br>• Uses `IndexedDB` + in-memory cache to avoid duplicate API calls per *word × sentence*. |
+| **Lexical Help** | • Click underlined words to get ≤ 15-word, context-aware definitions.<br>• Powered by OpenAI `gpt-4.1-nano`.<br>• Uses `IndexedDB` + in-memory cache to avoid duplicate API calls per *word × sentence*. <br>• ⚠️ Disabled if no OpenAI API key is provided. |
 | **AI Page Tools** | • Ask questions about the page using local embeddings.<br>• Summarize the page.<br>• Force pre-embedding for faster future queries.<br>• ⚠️ Disabled if no OpenAI API key is provided. |
 | **Visual Comfort** | • Pastel overlay palette to reduce screen glare.<br>• **Tint intensity slider** to adjust overlay strength.<br>• Font options: Default, OpenDyslexic, Lexend Deca.<br>• Sliders for letter spacing, word spacing, and line height. |
 | **Bionic Reading** | • Option to bold the first part of each word for improved readability. |
