@@ -19,8 +19,8 @@
   },
 
   "action": {
-    "default_title": "Dyslexia NLP Helper",
-    "default_popup": "popup.html"
+    "default_title": "Dyslexia Helper",
+    "default_popup": "popup/popup.html"
   },
 
 "content_scripts": [
@@ -29,7 +29,7 @@
     "run_at": "document_idle",
     "js": [
       "secret.js",
-      "common-words.js",
+      "assets/common-words.js",
       "content/api.js",
       "content/cache.js",
       "content/explain.js",
@@ -38,8 +38,7 @@
       "content/bionic.js",
       "content/embed.js",
       "content/main.js",
-      "content/qa-widget.js",
-      "math.js"
+      "content/qa-widget.js"
     ],
     "css": ["styles.css"]
   }
