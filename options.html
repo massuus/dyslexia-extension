@@ -6,21 +6,39 @@
   <title>Settings – Dyslexia Helper</title>
   <link rel="stylesheet" href="popup/popup.css" />
   <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 32px 20px;
+    }
+
+    .centered-card {
+      width: 100%;
+      max-width: 480px; /* ~half screen for standard sizes */
+    }
+
     .help-text {
       font-size: 13px;
       opacity: 0.8;
       margin-top: 8px;
     }
+
     .api-key-controls {
       display: flex;
       gap: 8px;
       margin-top: 10px;
     }
+
+    .credits {
+      margin-top: 32px;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
 
-  <div class="card column">
+  <div class="card column centered-card">
     <h1>🔑 OpenAI API Key</h1>
     <label for="apiKeyInput" class="explanation-text">Enter your key to use AI features</label>
     <input
@@ -49,6 +67,5 @@
   </div>
 
   <script src="options.js"></script>
-
 </body>
 </html>
