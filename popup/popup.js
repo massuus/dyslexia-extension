@@ -150,4 +150,15 @@
     sendToTab({ type: "askPagePrompt", prefill: "Summarize this page" });
   });
 
+  /* ---------- Security Button ---------- */
+  const secBtn = document.getElementById("securityBtn");
+  if (secBtn) {
+    secBtn.addEventListener("click", () => {
+      chrome.tabs.create({ url: chrome.runtime.getURL("security.html") });
+    });
+  }
+
+
+
+
 })();

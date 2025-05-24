@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Security & Privacy – Dyslexia NLP Helper</title>
+  <link rel="stylesheet" href="popup/popup.css" />
+  <style>
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      max-width: 100%;
+      gap: 16px;
+    }
+
+    .card pre {
+      font-size: 12px;
+      background: #f3f4f6;
+      padding: 8px;
+      border-radius: var(--radius);
+      overflow-x: auto;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .card pre {
+        background: #1f2937;
+        color: #f3f4f6;
+      }
+    }
+
+    @media screen and (min-width: 960px) {
+      .grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <div class="card column">
+    <h1>🔐 Security & Privacy Policy</h1>
+    <div class="explanation-text">How I protect your data and keep your experience safe</div>
+  </div>
+
+  <!-- Grid of sections -->
+  <div class="grid">
+
+    <div class="card column">
+      <h1>Content Security Policy</h1>
+      <p>I follow <strong>Chrome Extension Manifest V3</strong> standards:</p>
+      <pre><code>"content_security_policy": {
+  "extension_pages": "script-src 'self'; object-src 'self';"
+}</code></pre>
+      <p>This blocks external scripts and ensures trusted code execution only.</p>
+    </div>
+
+    <div class="card column">
+      <h1>Minimal Permissions</h1>
+      <p>I only request what’s essential:</p>
+      <ul>
+        <li><code>activeTab</code> – For analyzing the current tab.</li>
+        <li><code>contextMenus</code> – Optional right-click support.</li>
+        <li><code>storage</code> – For local settings like font and overlay color.</li>
+      </ul>
+    </div>
+
+    <div class="card column">
+      <h1>External API</h1>
+      <p>This extension only connects to:</p>
+      <ul>
+        <li><code>https://api.openai.com</code> – For explanations and AI responses.</li>
+      </ul>
+      <p>No other domains are contacted.</p>
+    </div>
+
+    <div class="card column">
+      <h1>Local Storage</h1>
+      <p>I store cached data safely using:</p>
+      <ul>
+        <li><code>IndexedDB</code> – For saved definitions and settings.</li>
+        <li><code>Map()</code> – For in-memory, session-only values.</li>
+      </ul>
+    </div>
+
+    <div class="card column">
+      <h1>No Tracking</h1>
+      <p>No cookies. No analytics. No ads. This extension does not track you or your activity.</p>
+    </div>
+
+    <div class="card column">
+      <h1>Open Source</h1>
+      <p>The source code is open for inspection. I believe in transparency and welcome feedback and contributions.</p>
+      <p>
+        📂 View it on 
+        <a href="https://github.com/massuus/dyslexia-extension" target="_blank" style="color: var(--c-accent); text-decoration: none;">
+          GitHub
+        </a>.
+      </p>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="credits">
+    v0.3 · Made with ✨Procrastination✨ by Sam van Remortel · 
+    <a href="https://github.com/massuus/dyslexia-extension" target="_blank">GitHub</a>
+  </div>
+
+</body>
+</html>
