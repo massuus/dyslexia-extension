@@ -40,7 +40,6 @@
     "matches": ["<all_urls>"],
     "run_at": "document_idle",
     "js": [
-      "secret.js",
       "assets/common-words.js",
       "content/api.js",
       "content/cache.js",
