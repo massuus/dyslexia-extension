@@ -67,8 +67,6 @@ The extension comprises two primary user-facing features—“Click-to-Explain�
 
 ### Video Demo
 
-<iframe width="840" height="472,5" src="https://imagekit.io/player/embed/massuus/Recording%202025-05-28%20120239%20(1).mp4/ik-master.m3u8?updatedAt=1748427039726&thumbnail=https%3A%2F%2Fik.imagekit.io%2Fmassuus%2FRecording%25202025-05-28%2520120239%2520%281%29.mp4%2Fik-thumbnail.jpg%3FupdatedAt%3D1748427039726&updatedAt=1748427039726&tr=sr-240_360_480_720_1080_2160" title="ImageKit video player" frameBorder="0" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"> </iframe>
-
 📹 [Watch a demo screencast](https://imagekit.io/player/embed/massuus/Recording%202025-05-28%20120239%20%281%29.mp4)
 
 ---
