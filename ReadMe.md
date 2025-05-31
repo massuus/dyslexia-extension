@@ -99,6 +99,7 @@ Built by **Sam van Remortel**.
 * **Word Guesser**: type a word as you think it’s spelled and the AI suggests the correct spelling.
 * One-click rewrite: fix grammar and spelling without changing the intended meaning.
 
+---
 
 ## 🙏 Credits
 
