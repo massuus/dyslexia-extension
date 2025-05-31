@@ -85,6 +85,21 @@ Built by **Sam van Remortel**.
 
 ---
 
+## 🗓️ Agenda
+
+### Immediate Tasks
+
+* Remove **Word Explainer** from hyperlinks.
+* Disable **Word Explainer** on first install when no API key is provided.
+* Resolve the clash between **Bionic Reading** and **Word Explainer**.
+
+### Future plans
+
+* Per-page custom preferences.
+* **Word Guesser**: type a word as you think it’s spelled and the AI suggests the correct spelling.
+* One-click rewrite: fix grammar and spelling without changing the intended meaning.
+
+
 ## 🙏 Credits
 
 Crafted with ✨hyperfocus and procrastination✨  
