@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Dyslexia NLP Helper (MVP)",
-  "version": "0.3",
-  "description": "Highlights difficult words and shows context-aware explanations.",
+  "name": "Dyslexia Helper",
+  "version": "0.3.1",
+  "description": "All things dyslexia. A browser extension to help with reading and understanding text on the web.",
 
    "icons": {
     "16": "assets/icons/icon16.png",

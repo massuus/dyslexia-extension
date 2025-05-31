@@ -71,11 +71,15 @@
       </div>
 
       <label for="fontSelect" class="visually-hidden">Font selection</label>
-      <select id="fontSelect" title="Font selection">
-        <option value="inherit">Website font</option>
-        <option value="'OpenDyslexic',sans-serif">OpenDyslexic</option>
-        <option value="'LexendDeca',sans-serif">Lexend Deca</option>
-      </select>
+      <div class="dropdown" id="fontDropdown">
+        <button class="dropdown-toggle" id="fontDropdownBtn">Select Font</button>
+        <ul class="dropdown-menu" id="fontDropdownMenu">
+          <li data-value="inherit">Website font</li>
+          <li data-value="'OpenDyslexic',sans-serif">OpenDyslexic</li>
+          <li data-value="'LexendDeca',sans-serif">Lexend Deca</li>
+        </ul>
+      </div>
+
     </div>
 
     <label>Letter-spacing
@@ -116,7 +120,7 @@
 
   <!-- 👣 Footer -->
   <div class="credits">
-    v0.3 · Made with ✨Procrastination✨<br>
+    <span id="version"></span> · Made with ✨Procrastination✨<br>
     by Sam van Remortel
     <br>
     <br>

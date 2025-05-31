@@ -1,4 +1,4 @@
-# Dyslexia Extension v0.3
+# Dyslexia Extension v0.3.1
 
 A Chrome/Edge-compatible extension that makes any webpage easier to read for people with dyslexia or low literacy by **explaining difficult words in-place** and allowing users to **customize colours and typography**.
 
@@ -89,7 +89,6 @@ Built by **Sam van Remortel**.
 
 ### Immediate Tasks
 
-* Remove **Word Explainer** from hyperlinks.
 * Disable **Word Explainer** on first install when no API key is provided.
 * Resolve the clash between **Bionic Reading** and **Word Explainer**.
 

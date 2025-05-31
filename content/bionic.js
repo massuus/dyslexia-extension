@@ -18,72 +18,110 @@ function removeCss() {
 
 /* Determines how many letters to bold based on word length */
 function fixLen(word) {
-  const n = word.length;
-  return n <= 3 ? 1 : n <= 6 ? 2 : n <= 9 ? 3 : 4;
+  const len = word.length;
+  if (len <= 1) return 1;
+  if (len <= 3) return 1;
+  if (len <= 6) return 2;
+  if (len <= 9) return 3;
+  return Math.ceil(len * 0.4);
 }
 
-/* Convert a text block into Bionic-style words */
-function convertBlock(el, explainerEnabled, isDifficult) {
-  if (el.dataset.brDone) return;
-  el.dataset.brDone = "y";
+/* Convert a block into BR (and optionally wrap in df-word if explainer is on) */
+function convertBlock(block) {
+  if (block.hasAttribute("data-br-done")) return;
 
-  const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, {
-    acceptNode(node) {
-      if (!node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
-      if (node.parentNode.closest(".br-word")) return NodeFilter.FILTER_REJECT;
-      if (/^(SCRIPT|STYLE|NOSCRIPT|CODE|PRE|TEXTAREA)$/i.test(node.parentNode.tagName)) return NodeFilter.FILTER_REJECT;
-      return NodeFilter.FILTER_ACCEPT;
-    }
-  });
-
-  const textNodes = [];
-  while (walker.nextNode()) {
-    textNodes.push(walker.currentNode);
+  function getDifficultWords(text) {
+    const words = text.match(/\b[\p{L}\p{M}]{8,}\b/gu) || [];
+    return new Set(words.map(w => w.toLowerCase()));
   }
 
-  for (const node of textNodes) {
-    const parts = node.nodeValue.split(/(\s+)/);
-    if (parts.length < 2) continue;
+  const difficultWords = getDifficultWords(block.textContent);
+  const walker = document.createTreeWalker(block, NodeFilter.SHOW_TEXT, null);
+  const nodes = [];
 
+  while (walker.nextNode()) {
+    const node = walker.currentNode;
+    const parent = node.parentNode;
+    const tag = parent.tagName?.toLowerCase();
+
+    if (
+      !["script", "style", "textarea"].includes(tag) &&
+      !parent.closest(".df-word") &&
+      !parent.closest(".br-word")
+    ) {
+      nodes.push(node);
+    }
+  }
+
+  for (const node of nodes) {
+    const text = node.nodeValue;
+    const words = text.split(/(\s+)/);
     const frag = document.createDocumentFragment();
 
-    for (const word of parts) {
-      if (/^\s+$/.test(word)) {
+    for (let word of words) {
+      const trimmed = word.trim();
+      if (!trimmed || /\s+/.test(word)) {
         frag.appendChild(document.createTextNode(word));
         continue;
       }
 
-      const span = document.createElement("span");
-      span.className = "br-word";
-      const k = fixLen(word);
-      span.innerHTML = `<b>${word.slice(0, k)}</b>${word.slice(k)}`;
+      const wordLower = trimmed.toLowerCase();
+      const k = fixLen(trimmed);
+      const bolded = `<b>${trimmed.slice(0, k)}</b>${trimmed.slice(k)}`;
 
-      if (explainerEnabled && isDifficult(word)) {
+      const br = document.createElement("span");
+      br.className = "br-word";
+      br.innerHTML = bolded;
+
+      if (window.explainerEnabled && difficultWords.has(wordLower)) {
         const df = document.createElement("span");
         df.className = "df-word";
-        df.dataset.word = word;
-        df.dataset.sent = encodeURIComponent(word);
-        df.appendChild(span);
+        df.dataset.word = wordLower;
+        df.dataset.sent = encodeURIComponent(text);
+
+        df.appendChild(br);
         frag.appendChild(df);
       } else {
-        frag.appendChild(span);
+        frag.appendChild(br);
       }
     }
 
-    node.parentNode.replaceChild(frag, node);
+    node.replaceWith(frag);
   }
+
+  block.setAttribute("data-br-done", "y");
 }
 
-/* Public API: Enable Bionic Reading */
-window.enableBR = function (explainerEnabled, isDifficult) {
+/* Upgrade existing .br-word spans into .df-word wrappers */
+window.addDfToBrWords = function (root) {
+  if (!(root instanceof Element)) return;
+
+  root.querySelectorAll("span.br-word").forEach(br => {
+    if (br.closest(".df-word")) return;
+
+    const txt = br.textContent?.trim();
+    if (!txt || !window.isDifficult?.(txt)) return;
+
+    const df = document.createElement("span");
+    df.className = "df-word";
+    df.dataset.word = txt;
+    df.dataset.sent = encodeURIComponent(txt);
+
+    br.replaceWith(df);
+    df.appendChild(br);
+  });
+};
+
+/* Enable Bionic Reading */
+window.enableBR = function () {
   if (brOn) return;
   addCss();
 
-  const elements = document.querySelectorAll("p, li, h1, h2, h3, h4, h5, h6");
+  const elements = document.querySelectorAll("p, li, h1, h2, h3, h4, h5, h6, td, th");
   io = new IntersectionObserver(entries => {
     for (const entry of entries) {
       if (entry.isIntersecting) {
-        convertBlock(entry.target, explainerEnabled, isDifficult);
+        convertBlock(entry.target);
         io.unobserve(entry.target);
       }
     }
@@ -100,17 +138,23 @@ window.enableBR = function (explainerEnabled, isDifficult) {
   requestIdleCallback(registerBatch);
 
   mo = new MutationObserver(mutations => {
-    for (const m of mutations)
-      for (const n of m.addedNodes)
-        if (n.nodeType === 1 && /^(P|LI|H[1-6])$/.test(n.tagName))
+    for (const m of mutations) {
+      for (const n of m.addedNodes) {
+        if (
+          n.nodeType === 1 &&
+          /^(P|LI|H[1-6]|TD|TH)$/.test(n.tagName)
+        ) {
           io.observe(n);
+        }
+      }
+    }
   });
 
   mo.observe(document.body, { childList: true, subtree: true });
   brOn = true;
 };
 
-/* Public API: Disable Bionic Reading */
+/* Disable Bionic Reading */
 window.disableBR = function () {
   if (!brOn) return;
   io?.disconnect();

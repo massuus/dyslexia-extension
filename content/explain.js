@@ -1,40 +1,62 @@
 const defs = new Map(); // In-memory cache
-
-window.isDifficult = function (word) {
-  return !COMMON_WORDS.has(word.toLowerCase()) && /^[A-Za-z]+$/.test(word);
-};
+const minWordLength = 4; // Minimum word length to consider
 
 function makeKey(word, sentence) {
-  return word + "||" + sentence;
+  return `${word.toLowerCase()}||${sentence}`;
 }
 
-/* ------- Wrapping logic ------- */
+window.isDifficult = function (word) {
+  return word.length >= minWordLength &&
+         !COMMON_WORDS.has(word.toLowerCase()) &&
+         /^\p{L}+$/u.test(word);
+};
+
 function wrapTextFast(node) {
   const parent = node.parentNode;
   if (!parent || parent.closest(".df-word")) return;
 
-  const text = node.nodeValue;
-  const parts = text.split(/(\b[A-Za-z]{8,}\b)/);
-  if (parts.length <= 1 || !parts.some(isDifficult)) return;
+  // ❌ Skip if inside any clickable or interactive container
+  if (parent.closest("a, button, [role='button'], [onclick], [tabindex]")) return;
 
-  const frag = document.createDocumentFragment();
+  if (!node.isConnected) return;
+
+  const text = node.nodeValue;
   const sentence = encodeURIComponent(text.trim());
 
-  for (const part of parts) {
-    if (isDifficult(part)) {
-      const span = document.createElement("span");
-      span.className = "df-word";
-      span.textContent = part;
-      span.dataset.word = part;
-      span.dataset.sent = sentence;
-      frag.appendChild(span);
-    } else {
-      frag.appendChild(document.createTextNode(part));
+  const wordRegex = new RegExp(`\\p{L}{${minWordLength},}`, 'gu');
+  const matches = [...text.matchAll(wordRegex)];
+  if (matches.length === 0) return;
+
+  const frag = document.createDocumentFragment();
+  let lastIndex = 0;
+
+  for (const match of matches) {
+    const { 0: word, index } = match;
+    if (!isDifficult(word)) continue;
+
+    if (index > lastIndex) {
+      frag.appendChild(document.createTextNode(text.slice(lastIndex, index)));
     }
+
+    const span = document.createElement("span");
+    span.className = "df-word";
+    span.textContent = word;
+    span.dataset.word = word;
+    span.dataset.sent = sentence;
+    frag.appendChild(span);
+
+    lastIndex = index + word.length;
   }
 
-  parent.replaceChild(frag, node);
+  if (lastIndex < text.length) {
+    frag.appendChild(document.createTextNode(text.slice(lastIndex)));
+  }
+
+  if (node.parentNode) {
+    node.parentNode.replaceChild(frag, node);
+  }
 }
+
 
 window.walkAndWrap = function (root) {
   const walker = document.createTreeWalker(
@@ -44,8 +66,20 @@ window.walkAndWrap = function (root) {
       acceptNode(node) {
         const parent = node.parentNode;
         if (!node.nodeValue.trim() || !parent) return NodeFilter.FILTER_REJECT;
+
         if (parent.classList.contains("df-word")) return NodeFilter.FILTER_REJECT;
-        if (/^(SCRIPT|STYLE|NOSCRIPT|CODE|PRE|TEXTAREA)$/i.test(parent.tagName)) return NodeFilter.FILTER_REJECT;
+
+        const INTERACTIVE_TAGS = ["A", "BUTTON", "TEXTAREA", "SELECT", "LABEL", "INPUT", "SUMMARY", "OPTION"];
+
+        if (
+          /^(SCRIPT|STYLE|NOSCRIPT|CODE|PRE|TEXTAREA)$/i.test(parent.tagName) ||
+          INTERACTIVE_TAGS.includes(parent.tagName) ||
+          typeof parent.onclick === "function" ||
+          parent.closest("a, button, [role='button'], [onclick], [tabindex]") !== null
+        ) {
+          return NodeFilter.FILTER_REJECT;
+        }
+
         return NodeFilter.FILTER_ACCEPT;
       }
     }
@@ -126,16 +160,26 @@ window.setupClickHandler = function () {
 /* ------- Optional: wrap .br-word spans if enabled ------- */
 window.addDfToBrWords = function (root) {
   if (!(root instanceof Element)) return;
+
   root.querySelectorAll("span.br-word").forEach(br => {
+    // Skip if already wrapped
     if (br.closest(".df-word")) return;
+
+    // ❌ Skip if inside a clickable element like a link or button
+    const interactive = br.closest("a, button, [role='button'], [onclick], [tabindex]");
+    if (interactive) return;
+
     const txt = br.textContent;
     if (!isDifficult(txt)) return;
 
+    // ✅ Only wrap if safe
     const df = document.createElement("span");
     df.className = "df-word";
     df.dataset.word = txt;
     df.dataset.sent = encodeURIComponent(txt);
+
     br.replaceWith(df);
     df.appendChild(br);
   });
 };
+

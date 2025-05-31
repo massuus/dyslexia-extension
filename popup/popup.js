@@ -1,16 +1,15 @@
-// popup.js – Chrome extension popup UI logic
-(() => {
-  /* ---------- Safe tab message sender ---------- */
+window.addEventListener("DOMContentLoaded", () => {
+  // ---------- Safe tab message sender ----------
   function sendToTab(msg) {
     chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
       if (!tab?.id) return;
       chrome.tabs.sendMessage(tab.id, msg, () => {
-        void chrome.runtime.lastError; // silently ignore errors
+        void chrome.runtime.lastError;
       });
     });
   }
 
-  /* ---------- Word explainer toggle ---------- */
+  // ---------- Word explainer toggle ----------
   const expl = document.getElementById("toggle");
   if (expl) {
     chrome.storage.sync.get({ explainerEnabled: true }, v => expl.checked = v.explainerEnabled);
@@ -21,7 +20,22 @@
     });
   }
 
-  /* ---------- Overlay picker ---------- */
+  chrome.runtime.onMessage.addListener((msg) => {
+    if (msg.type === "toggleExplainer") {
+      if (msg.enabled && !window.explainerEnabled) {
+        window.explainerEnabled = true;
+        window.walkAndWrap?.(document.body);
+        window.setupClickHandler?.();
+      } else if (!msg.enabled && window.explainerEnabled) {
+        window.explainerEnabled = false;
+        document.querySelectorAll(".df-word").forEach(el => {
+          el.replaceWith(document.createTextNode(el.textContent));
+        });
+      }
+    }
+  });
+
+  // ---------- Overlay picker ----------
   const COLORS = ["#fde68a", "#bbf7d0", "#a5f3fc", "#c4b5fd", "#fbcfe8", "#ffffff"];
   const wrap = document.getElementById("swatch-wrap");
   const intensityEl = document.getElementById("tintIntensity");
@@ -55,6 +69,14 @@
     drawOverlaySwatches();
   });
 
+  function debounce(func, delay) {
+    let timeout;
+    return (...args) => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func(...args), delay);
+    };
+  }
+
   const debouncedUpdateOverlay = debounce((color, intensity) => {
     updateOverlay(color, intensity);
   }, 300);
@@ -64,17 +86,9 @@
     debouncedUpdateOverlay(overlayColor, intensity);
   });
 
-  function debounce(func, delay) {
-    let timeout;
-    return (...args) => {
-      clearTimeout(timeout);
-      timeout = setTimeout(() => func(...args), delay);
-    };
-  }
-
-  /* ---------- Typography controls ---------- */
+  // ---------- Typography controls ----------
   const els = {
-    font: document.getElementById("fontSelect"),
+    font: document.getElementById("fontSelect"), // may be unused if replaced with dropdown
     ls: document.getElementById("ls"),
     ws: document.getElementById("ws"),
     lh: document.getElementById("lh"),
@@ -90,17 +104,17 @@
 
   function loadTypography() {
     chrome.storage.sync.get({ typo: defaults }, ({ typo }) => {
-      els.font.value = typo.font;
+      dropdownBtn.textContent = getFontLabel(typo.font);
       els.ls.value = typo.ls;
       els.ws.value = typo.ws;
       els.lh.value = typo.lh;
     });
   }
 
-  ["font", "ls", "ws", "lh"].forEach(k => {
+  ["ls", "ws", "lh"].forEach(k => {
     els[k].addEventListener("input", () => {
       pushTypography({
-        font: els.font.value,
+        font: dropdownBtn.dataset.value || "inherit",
         ls: +els.ls.value,
         ws: +els.ws.value,
         lh: +els.lh.value
@@ -109,7 +123,8 @@
   });
 
   els.reset.addEventListener("click", () => {
-    els.font.value = defaults.font;
+    dropdownBtn.textContent = getFontLabel(defaults.font);
+    dropdownBtn.dataset.value = defaults.font;
     els.ls.value = defaults.ls;
     els.ws.value = defaults.ws;
     els.lh.value = defaults.lh;
@@ -119,7 +134,45 @@
 
   loadTypography();
 
-  /* ---------- Bionic reading toggle ---------- */
+  // ---------- Font dropdown ----------
+  const dropdownBtn = document.getElementById("fontDropdownBtn");
+  const dropdownMenu = document.getElementById("fontDropdownMenu");
+
+  function getFontLabel(value) {
+    switch (value) {
+      case "'OpenDyslexic',sans-serif": return "OpenDyslexic";
+      case "'LexendDeca',sans-serif": return "Lexend Deca";
+      case "inherit": return "Website font";
+      default: return "Custom Font";
+    }
+  }
+
+  dropdownBtn.addEventListener("click", () => {
+    dropdownMenu.style.display = dropdownMenu.style.display === "block" ? "none" : "block";
+  });
+
+  dropdownMenu.querySelectorAll("li").forEach(item => {
+    item.addEventListener("click", () => {
+      const fontValue = item.dataset.value;
+      dropdownBtn.textContent = item.textContent;
+      dropdownBtn.dataset.value = fontValue;
+
+      chrome.storage.sync.get({ typo: defaults }, ({ typo }) => {
+        typo.font = fontValue;
+        pushTypography(typo);
+      });
+
+      dropdownMenu.style.display = "none";
+    });
+  });
+
+  document.addEventListener("click", e => {
+    if (!dropdownBtn.contains(e.target) && !dropdownMenu.contains(e.target)) {
+      dropdownMenu.style.display = "none";
+    }
+  });
+
+  // ---------- Bionic toggle ----------
   const br = document.getElementById("brToggle");
   if (br) {
     chrome.storage.sync.get({ bionic: false }, v => br.checked = v.bionic);
@@ -130,47 +183,31 @@
     });
   }
 
-  /* ---------- Grey out UI for system pages ---------- */
-  chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
-    if (tab && !/^https?:\/\//.test(tab.url)) {
-      document.body.classList.add("blocked");
-    }
-  });
-
-  /* ---------- Grey out AI buttons when no API key is set ---------- */
+  // ---------- AI Key check ----------
   chrome.storage.sync.get("openaiApiKey", ({ openaiApiKey }) => {
     const hasKey = Boolean(openaiApiKey);
-
-    // AI tools section
     const aiButtons = ["embedBtn", "askBtn", "summarizeBtn"].map(id => document.getElementById(id));
     const aiDisabledMsg = document.getElementById("aiDisabledMsg");
-
-    // Word explainer
-    const explainerCard = document.getElementById("explainerCard");
     const explainerToggleWrap = document.getElementById("explainerToggleWrap");
     const explainerMsg = document.getElementById("explainerDisabledMsg");
+    const explainerCard = document.getElementById("explainerCard");
 
     if (!hasKey) {
-      // Disable AI buttons
       aiButtons.forEach(btn => {
         btn.disabled = true;
         btn.style.opacity = "0.5";
         btn.style.cursor = "not-allowed";
       });
       aiDisabledMsg.style.display = "block";
-
-      // Hide explainer toggle and show help
       if (explainerToggleWrap) explainerToggleWrap.style.display = "none";
-      explainerMsg.style.display = "block";
-
-      // ✅ Enable flex-wrap only when needed
+      if (explainerMsg) explainerMsg.style.display = "block";
       explainerCard?.classList.add("wrap");
 
-      // Open settings links
       document.getElementById("openOptionsLink")?.addEventListener("click", e => {
         e.preventDefault();
         chrome.runtime.openOptionsPage();
       });
+
       document.getElementById("openOptionsLink2")?.addEventListener("click", e => {
         e.preventDefault();
         chrome.runtime.openOptionsPage();
@@ -178,7 +215,7 @@
     }
   });
 
-  /* ---------- AI Button Actions ---------- */
+  // ---------- Buttons ----------
   document.getElementById("embedBtn")?.addEventListener("click", () => {
     sendToTab({ type: "forceEmbed" });
   });
@@ -191,22 +228,32 @@
     sendToTab({ type: "askPagePrompt", prefill: "Summarize this page" });
   });
 
-  /* ---------- Security Button ---------- */
-  const secBtn = document.getElementById("securityBtn");
-  if (secBtn) {
-    secBtn.addEventListener("click", () => {
-      chrome.tabs.create({ url: chrome.runtime.getURL("security.html") });
-    });
+  document.getElementById("securityBtn")?.addEventListener("click", () => {
+    chrome.tabs.create({ url: chrome.runtime.getURL("security.html") });
+  });
+
+  document.getElementById("optionsBtn")?.addEventListener("click", () => {
+    chrome.runtime.openOptionsPage();
+  });
+
+  // ---------- Block system pages ----------
+  chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
+    if (tab && !/^https?:\/\//.test(tab.url)) {
+      document.body.classList.add("blocked");
+    }
+  });
+
+  // ---------- Version display ----------
+  function setVersion(version) {
+    document.getElementById('version').textContent = 'v' + version;
   }
 
-  /* ---------- Options Button ---------- */
-  const optionsBtn = document.getElementById("optionsBtn");
-  if (optionsBtn) {
-    optionsBtn.addEventListener("click", () => {
-      chrome.runtime.openOptionsPage();
-    });
+  if (chrome.runtime?.getManifest) {
+    setVersion(chrome.runtime.getManifest().version);
+  } else {
+    fetch('../manifest.json')
+      .then(r => r.json())
+      .then(manifest => setVersion(manifest.version))
+      .catch(() => setVersion('?.?.?'));
   }
-
-
-
-})();
+});
