@@ -89,7 +89,7 @@ Built by **Sam van Remortel**.
 
 ### Immediate Tasks
 
-* Disable **Word Explainer** on first install when no API key is provided.
+* Check if the **OpenAI API key** is valid when the user enters it.
 * Resolve the clash between **Bionic Reading** and **Word Explainer**.
 
 ### Future plans
