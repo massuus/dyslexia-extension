@@ -89,7 +89,6 @@ Built by **Sam van Remortel**.
 
 ### Immediate Tasks
 
-* Check if the **OpenAI API key** is valid when the user enters it.
 * Resolve the clash between **Bionic Reading** and **Word Explainer**.
 
 ### Future plans
@@ -97,6 +96,14 @@ Built by **Sam van Remortel**.
 * Per-page custom preferences.
 * **Word Guesser**: type a word as you think it’s spelled and the AI suggests the correct spelling.
 * One-click rewrite: fix grammar and spelling without changing the intended meaning.
+
+## 📝 Changelog
+
+### v0.3.1
+* Bionic bug with emojis: ensure emojis are not bolded in Bionic Reading mode.
+* Bionic bug not bolding some words: ensure Bionic Reading works correctly for all words.
+* Check if the **OpenAI API key** is valid when the user enters it.
+
 
 ---
 

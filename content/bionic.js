@@ -55,7 +55,7 @@ function convertBlock(block) {
 
   for (const node of nodes) {
     const text = node.nodeValue;
-    const words = text.split(/(\s+)/);
+    const words = text.split(/(\s+|[\p{Emoji_Presentation}\p{Extended_Pictographic}]+)/gu);
     const frag = document.createDocumentFragment();
 
     for (let word of words) {
@@ -66,8 +66,15 @@ function convertBlock(block) {
       }
 
       const wordLower = trimmed.toLowerCase();
+      // Skip words that contain emoji or symbols
+      if (/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/u.test(trimmed)) {
+        frag.appendChild(document.createTextNode(word));
+        continue;
+      }
+
       const k = fixLen(trimmed);
       const bolded = `<b>${trimmed.slice(0, k)}</b>${trimmed.slice(k)}`;
+
 
       const br = document.createElement("span");
       br.className = "br-word";
