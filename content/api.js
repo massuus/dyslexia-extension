@@ -9,9 +9,14 @@ const EMBED_MODEL = "text-embedding-3-small";
  */
 async function getOpenAIKey() {
   return new Promise(resolve => {
-    chrome.storage.sync.get("openaiApiKey", ({ openaiApiKey }) => {
-      resolve(openaiApiKey || "");
-    });
+    try {
+      chrome.storage.sync.get("openaiApiKey", ({ openaiApiKey }) => {
+        resolve(openaiApiKey || "");
+      });
+    } catch (e) {
+      console.warn("Extension context invalidated:", e);
+      resolve(""); // fallback or handle gracefully
+    }
   });
 }
 

@@ -41,8 +41,14 @@ function toggleExplainer(enabled) {
   } else if (!enabled && cleanupExplainer) {
     cleanupExplainer();
     cleanupExplainer = null;
+
+    // 🔁 Full cleanup of df-word spans
+    document.querySelectorAll(".df-word").forEach(span => {
+      span.replaceWith(document.createTextNode(span.textContent));
+    });
   }
 }
+
 
 // -------------- MESSAGE HANDLER --------------
 chrome.runtime.onMessage.addListener(async (msg) => {
@@ -113,13 +119,16 @@ chrome.storage.sync.get(
     if (prefs.explainerEnabled) {
       toggleExplainer(true);
     } else {
+      // ✅ Ensure clean state on startup if explainer is off
       document.querySelectorAll(".df-word").forEach(span => {
         span.replaceWith(document.createTextNode(span.textContent));
       });
     }
 
     if (prefs.bionic) {
-      enableBR(); // internally reads window.explainerEnabled
+      enableBR();
+    } else {
+      disableBR();
     }
   }
 );

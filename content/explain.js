@@ -1,5 +1,14 @@
-const defs = new Map(); // In-memory cache
-const minWordLength = 4; // Minimum word length to consider
+const defs = new Map();
+const minWordLength = 4;
+
+function fixLen(word) {
+  const len = word.length;
+  if (len <= 1) return 1;
+  if (len <= 3) return 1;
+  if (len <= 6) return 2;
+  if (len <= 9) return 3;
+  return Math.ceil(len * 0.4);
+}
 
 function makeKey(word, sentence) {
   return `${word.toLowerCase()}||${sentence}`;
@@ -14,15 +23,11 @@ window.isDifficult = function (word) {
 function wrapTextFast(node) {
   const parent = node.parentNode;
   if (!parent || parent.closest(".df-word")) return;
-
-  // ❌ Skip if inside any clickable or interactive container
   if (parent.closest("a, button, [role='button'], [onclick], [tabindex]")) return;
-
   if (!node.isConnected) return;
 
   const text = node.nodeValue;
   const sentence = encodeURIComponent(text.trim());
-
   const wordRegex = new RegExp(`\\p{L}{${minWordLength},}`, 'gu');
   const matches = [...text.matchAll(wordRegex)];
   if (matches.length === 0) return;
@@ -38,13 +43,22 @@ function wrapTextFast(node) {
       frag.appendChild(document.createTextNode(text.slice(lastIndex, index)));
     }
 
-    const span = document.createElement("span");
-    span.className = "df-word";
-    span.textContent = word;
-    span.dataset.word = word;
-    span.dataset.sent = sentence;
-    frag.appendChild(span);
+    const dfSpan = document.createElement("span");
+    dfSpan.className = "df-word";
+    dfSpan.dataset.word = word;
+    dfSpan.dataset.sent = sentence;
 
+    if (window.brOn) {
+      const k = fixLen(word);
+      const br = document.createElement("span");
+      br.className = "br-word";
+      br.innerHTML = `<b>${word.slice(0, k)}</b>${word.slice(k)}`;
+      dfSpan.appendChild(br);
+    } else {
+      dfSpan.textContent = word;
+    }
+
+    frag.appendChild(dfSpan);
     lastIndex = index + word.length;
   }
 
@@ -57,7 +71,6 @@ function wrapTextFast(node) {
   }
 }
 
-
 window.walkAndWrap = function (root) {
   const walker = document.createTreeWalker(
     root,
@@ -66,11 +79,9 @@ window.walkAndWrap = function (root) {
       acceptNode(node) {
         const parent = node.parentNode;
         if (!node.nodeValue.trim() || !parent) return NodeFilter.FILTER_REJECT;
-
         if (parent.classList.contains("df-word")) return NodeFilter.FILTER_REJECT;
 
         const INTERACTIVE_TAGS = ["A", "BUTTON", "TEXTAREA", "SELECT", "LABEL", "INPUT", "SUMMARY", "OPTION"];
-
         if (
           /^(SCRIPT|STYLE|NOSCRIPT|CODE|PRE|TEXTAREA)$/i.test(parent.tagName) ||
           INTERACTIVE_TAGS.includes(parent.tagName) ||
@@ -159,27 +170,71 @@ window.setupClickHandler = function () {
 
 /* ------- Optional: wrap .br-word spans if enabled ------- */
 window.addDfToBrWords = function (root) {
-  if (!(root instanceof Element)) return;
+  console.warn("[addDfToBrWords] Function called with root:", root);
 
-  root.querySelectorAll("span.br-word").forEach(br => {
-    // Skip if already wrapped
-    if (br.closest(".df-word")) return;
+  if (!(root instanceof Element)) {
+    console.warn("[addDfToBrWords] ❌ Root is not a valid Element:", root);
+    return;
+  }
 
-    // ❌ Skip if inside a clickable element like a link or button
-    const interactive = br.closest("a, button, [role='button'], [onclick], [tabindex]");
-    if (interactive) return;
+  if (typeof window.brOn === "undefined") {
+    console.warn("[addDfToBrWords] ⚠️ window.brOn is undefined.");
+  } else {
+    console.warn("[addDfToBrWords] ✅ window.brOn is:", window.brOn);
+  }
 
-    const txt = br.textContent;
-    if (!isDifficult(txt)) return;
+  if (!window.brOn) {
+    console.warn("[addDfToBrWords] ❌ brOn is false, exiting.");
+    return;
+  }
 
-    // ✅ Only wrap if safe
-    const df = document.createElement("span");
-    df.className = "df-word";
-    df.dataset.word = txt;
-    df.dataset.sent = encodeURIComponent(txt);
+  console.warn("[addDfToBrWords] 🔍 Searching for span.df-word elements...");
 
-    br.replaceWith(df);
+  const dfWords = root.querySelectorAll("span.df-word");
+  console.warn(`[addDfToBrWords] 🧠 Found ${dfWords.length} .df-word elements.`);
+
+  dfWords.forEach((df, idx) => {
+    console.warn(`[addDfToBrWords] (${idx + 1}/${dfWords.length}) Processing:`, df);
+
+    if (df.querySelector(".br-word")) {
+      console.warn(`[addDfToBrWords]   🔁 Skipping: already has .br-word`);
+      return;
+    }
+
+    const txt = df.textContent?.trim();
+    console.warn(`[addDfToBrWords]   📖 Text content:`, txt);
+
+    if (!txt) {
+      console.warn("[addDfToBrWords]   ❌ No text found, skipping.");
+      return;
+    }
+
+    if (typeof window.isDifficult !== "function") {
+      console.warn("[addDfToBrWords]   ❌ isDifficult function is missing.");
+      return;
+    }
+
+    const difficult = window.isDifficult(txt);
+    console.warn(`[addDfToBrWords]   🧪 isDifficult('${txt}') →`, difficult);
+    if (!difficult) {
+      console.warn("[addDfToBrWords]   ❌ Word is not difficult, skipping.");
+      return;
+    }
+
+    df.textContent = "";
+    const k = fixLen(txt);
+    console.warn(`[addDfToBrWords]   ✂️ fixLen('${txt}') → ${k}`);
+
+    const br = document.createElement("span");
+    br.className = "br-word";
+    br.innerHTML = `<b>${txt.slice(0, k)}</b>${txt.slice(k)}`;
     df.appendChild(br);
+
+    console.warn(`[addDfToBrWords]   ✅ Inserted br-word for '${txt}'.`);
   });
+
+  console.warn("[addDfToBrWords] 🎉 Finished processing all df-word elements.");
 };
+
+
 

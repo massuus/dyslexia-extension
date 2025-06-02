@@ -66,7 +66,6 @@ function convertBlock(block) {
       }
 
       const wordLower = trimmed.toLowerCase();
-      // Skip words that contain emoji or symbols
       if (/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/u.test(trimmed)) {
         frag.appendChild(document.createTextNode(word));
         continue;
@@ -74,7 +73,6 @@ function convertBlock(block) {
 
       const k = fixLen(trimmed);
       const bolded = `<b>${trimmed.slice(0, k)}</b>${trimmed.slice(k)}`;
-
 
       const br = document.createElement("span");
       br.className = "br-word";
@@ -85,7 +83,6 @@ function convertBlock(block) {
         df.className = "df-word";
         df.dataset.word = wordLower;
         df.dataset.sent = encodeURIComponent(text);
-
         df.appendChild(br);
         frag.appendChild(df);
       } else {
@@ -99,30 +96,54 @@ function convertBlock(block) {
   block.setAttribute("data-br-done", "y");
 }
 
-/* Upgrade existing .br-word spans into .df-word wrappers */
+/* Upgrade .df-word spans with br-word formatting if missing */
 window.addDfToBrWords = function (root) {
-  if (!(root instanceof Element)) return;
 
-  root.querySelectorAll("span.br-word").forEach(br => {
-    if (br.closest(".df-word")) return;
+  if (!root) {
+    return;
+  }
 
-    const txt = br.textContent?.trim();
-    if (!txt || !window.isDifficult?.(txt)) return;
+  if (!(root instanceof Element)) {
+    return;
+  }
 
-    const df = document.createElement("span");
-    df.className = "df-word";
-    df.dataset.word = txt;
-    df.dataset.sent = encodeURIComponent(txt);
+  if (!window.brOn) {
+    return;
+  }
 
-    br.replaceWith(df);
+
+  const dfWords = root.querySelectorAll("span.df-word");
+
+  dfWords.forEach(df => {
+    if (df.querySelector(".br-word")) {
+      return;
+    }
+
+    const txt = df.textContent?.trim();
+    if (!txt) {
+      return;
+    }
+
+    if (!window.isDifficult?.(txt)) {
+      return;
+    }
+
+    const k = fixLen(txt);
+    const br = document.createElement("span");
+    br.className = "br-word";
+    br.innerHTML = `<b>${txt.slice(0, k)}</b>${txt.slice(k)}`;
+
+    df.textContent = "";
     df.appendChild(br);
   });
 };
+
 
 /* Enable Bionic Reading */
 window.enableBR = function () {
   if (brOn) return;
   addCss();
+  window.brOn = true;
 
   const elements = document.querySelectorAll("p, li, h1, h2, h3, h4, h5, h6, td, th");
   io = new IntersectionObserver(entries => {
@@ -158,19 +179,39 @@ window.enableBR = function () {
   });
 
   mo.observe(document.body, { childList: true, subtree: true });
-  brOn = true;
+
+  // 🔁 Upgrade explainer-only spans to include bionic formatting
+  addDfToBrWords(document.body);
 };
 
 /* Disable Bionic Reading */
-window.disableBR = function () {
+function disableBR() {
   if (!brOn) return;
-  io?.disconnect();
-  mo?.disconnect();
+  io?.disconnect?.();
+  mo?.disconnect?.();
   removeCss();
 
-  document.querySelectorAll(".br-word").forEach(el => {
-    el.replaceWith(document.createTextNode(el.textContent));
+  // 🔁 Remove BR wrapping inside df-word
+  document.querySelectorAll(".df-word > .br-word").forEach(br => {
+    const parent = br.parentElement;
+    if (!parent) return;
+    const text = document.createTextNode(br.textContent);
+    parent.replaceChild(text, br);
+  });
+
+  // 🔁 Remove any remaining standalone br-words
+  document.querySelectorAll(".br-word").forEach(span => {
+    if (!span.closest(".df-word")) {
+      span.replaceWith(document.createTextNode(span.textContent));
+    }
+  });
+
+  // ✅ Also remove outer df-word spans
+  document.querySelectorAll(".df-word").forEach(span => {
+    span.replaceWith(document.createTextNode(span.textContent));
   });
 
   brOn = false;
-};
+  window.brOn = false;
+}
+
