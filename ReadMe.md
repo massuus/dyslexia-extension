@@ -89,7 +89,7 @@ Built by **Sam van Remortel**.
 
 ### Immediate Tasks
 
-* Resolve the clash between **Bionic Reading** and **Word Explainer**.
+* Think about a better name for the extension.
 
 ### Future plans
 
@@ -103,6 +103,7 @@ Built by **Sam van Remortel**.
 * Bionic bug with emojis: ensure emojis are not bolded in Bionic Reading mode.
 * Bionic bug not bolding some words: ensure Bionic Reading works correctly for all words.
 * Check if the **OpenAI API key** is valid when the user enters it.
+* Resolve the clash between **Bionic Reading** and **Word Explainer**.
 
 
 ---

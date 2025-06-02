@@ -170,71 +170,27 @@ window.setupClickHandler = function () {
 
 /* ------- Optional: wrap .br-word spans if enabled ------- */
 window.addDfToBrWords = function (root) {
-  console.warn("[addDfToBrWords] Function called with root:", root);
-
-  if (!(root instanceof Element)) {
-    console.warn("[addDfToBrWords] ❌ Root is not a valid Element:", root);
-    return;
-  }
-
-  if (typeof window.brOn === "undefined") {
-    console.warn("[addDfToBrWords] ⚠️ window.brOn is undefined.");
-  } else {
-    console.warn("[addDfToBrWords] ✅ window.brOn is:", window.brOn);
-  }
-
-  if (!window.brOn) {
-    console.warn("[addDfToBrWords] ❌ brOn is false, exiting.");
-    return;
-  }
-
-  console.warn("[addDfToBrWords] 🔍 Searching for span.df-word elements...");
+  if (!(root instanceof Element)) return;
+  if (!window.brOn) return;
 
   const dfWords = root.querySelectorAll("span.df-word");
-  console.warn(`[addDfToBrWords] 🧠 Found ${dfWords.length} .df-word elements.`);
 
-  dfWords.forEach((df, idx) => {
-    console.warn(`[addDfToBrWords] (${idx + 1}/${dfWords.length}) Processing:`, df);
-
-    if (df.querySelector(".br-word")) {
-      console.warn(`[addDfToBrWords]   🔁 Skipping: already has .br-word`);
-      return;
-    }
+  dfWords.forEach(df => {
+    if (df.querySelector(".br-word")) return;
 
     const txt = df.textContent?.trim();
-    console.warn(`[addDfToBrWords]   📖 Text content:`, txt);
-
-    if (!txt) {
-      console.warn("[addDfToBrWords]   ❌ No text found, skipping.");
-      return;
-    }
-
-    if (typeof window.isDifficult !== "function") {
-      console.warn("[addDfToBrWords]   ❌ isDifficult function is missing.");
-      return;
-    }
-
-    const difficult = window.isDifficult(txt);
-    console.warn(`[addDfToBrWords]   🧪 isDifficult('${txt}') →`, difficult);
-    if (!difficult) {
-      console.warn("[addDfToBrWords]   ❌ Word is not difficult, skipping.");
-      return;
-    }
+    if (!txt || typeof window.isDifficult !== "function" || !window.isDifficult(txt)) return;
 
     df.textContent = "";
     const k = fixLen(txt);
-    console.warn(`[addDfToBrWords]   ✂️ fixLen('${txt}') → ${k}`);
 
     const br = document.createElement("span");
     br.className = "br-word";
     br.innerHTML = `<b>${txt.slice(0, k)}</b>${txt.slice(k)}`;
     df.appendChild(br);
-
-    console.warn(`[addDfToBrWords]   ✅ Inserted br-word for '${txt}'.`);
   });
-
-  console.warn("[addDfToBrWords] 🎉 Finished processing all df-word elements.");
 };
+
 
 
 
