@@ -143,6 +143,7 @@ window.addDfToBrWords = function (root) {
 window.enableBR = function () {
   if (brOn) return;
   addCss();
+  brOn = true;
   window.brOn = true;
 
   const elements = document.querySelectorAll("p, li, h1, h2, h3, h4, h5, h6, td, th");
