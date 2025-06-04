@@ -243,17 +243,5 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // ---------- Version display ----------
-  function setVersion(version) {
-    document.getElementById('version').textContent = 'v' + version;
-  }
-
-  if (chrome.runtime?.getManifest) {
-    setVersion(chrome.runtime.getManifest().version);
-  } else {
-    fetch('../manifest.json')
-      .then(r => r.json())
-      .then(manifest => setVersion(manifest.version))
-      .catch(() => setVersion('?.?.?'));
-  }
+  // Version injected via version.js
 });
