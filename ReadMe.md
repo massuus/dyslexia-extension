@@ -1,7 +1,3 @@
-Here is your updated `README.md` reflecting that the extension is **live on the Chrome Web Store**, along with some polish to better fit a public release:
-
----
-
 # Dyslexia Extension v0.3.1
 
 A Chrome/Edge-compatible extension that makes any webpage easier to read for people with dyslexia or low literacy by **explaining difficult words in-place** and allowing users to **customize colours and typography**.
