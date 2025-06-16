@@ -150,6 +150,7 @@ This layout:
 
 ### Future Plans
 
+* Color picker for **Tint Overlay**.
 * Per-page custom preferences.
 * **Word Guesser**: Type a word as you think it’s spelled and the AI suggests the correct one.
 * One-click rewrite: Fix grammar and spelling without changing the intended meaning.
